@@ -45,3 +45,9 @@ processResources {
 		expand "version": version
 	}
 }
+
+afterEvaluate {
+    tasks.named('downloadAssets') {
+        downloadThreads = 2
+    }
+}
