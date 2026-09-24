@@ -1,4 +1,4 @@
-package dev.dario.projectcore;
+package dev.dario.mictlan;
 
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
