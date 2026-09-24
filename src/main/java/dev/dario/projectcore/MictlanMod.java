@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * lo reconoce y lo carga — sin Mixins, sin dependencia de Nexus Characters,
  * sin ninguna logica propia todavia.
  */
-public class ProjectCoreMod implements ModInitializer {
+public class MictlanMod implements ModInitializer {
 
     /** Debe coincidir exactamente con el "id" de fabric.mod.json. */
     public static final String MOD_ID = "mictlan";
