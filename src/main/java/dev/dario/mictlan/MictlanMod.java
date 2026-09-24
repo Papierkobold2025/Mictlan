@@ -57,6 +57,7 @@ public class MictlanMod implements ModInitializer {
         Path configDir = FabricLoader.getInstance().getConfigDir();
         final boolean playerDataExists = Files.exists(Path.of(configDir.toString(), "mictlan_player_data.txt"));
 
+        // Leer el archivo de datos del jugador si existe, o crear uno nuevo si no existe
         try {
             if (playerDataExists) {
                 List<String> playerUUIDList = Files.readAllLines(Path.of(configDir.toString(), "mictlan_player_data.txt"));
@@ -75,14 +76,17 @@ public class MictlanMod implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             String playerName = handler.getPlayer().getGameProfile().getName();
             String playerUUID = handler.getPlayer().getGameProfile().getId().toString();
+            String playerLocation = handler.getPlayer().getPos().toString();
 
             // Verificar si el jugador ya se ha conectado antes
-
+            Text playerLocationTestMessage = Text.literal("Tu ubicación actual es: " + playerLocation);
+            handler.getPlayer().sendMessage(playerLocationTestMessage, false);
             if (!playerUUIDMap.contains(playerUUID)) {
                 playerUUIDMap.add(playerUUID);
                 //Enviar mensaje de bienvenida al jugador, en caso de que no haya jugado antes
                 Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
                 handler.getPlayer().sendMessage(welcomeMessage, false);
+                    // Guardar el UUID del jugador en el archivo de datos
                     try{
                         Files.writeString(Path.of(FabricLoader.getInstance().getConfigDir().toString(), "mictlan_player_data.txt"), playerUUID + System.lineSeparator(), java.nio.file.StandardOpenOption.APPEND);
                     } catch (IOException e) {
@@ -97,7 +101,7 @@ public class MictlanMod implements ModInitializer {
             LOGGER.info("[Mictlan] " + playerName + " se conectó.");
         });
 
-        
+        // Registrar evento de desconexión de jugadores
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             String playerName = handler.getPlayer().getGameProfile().getName();        
             LOGGER.info("[Mictlan] " + playerName + " se desconectó.");
