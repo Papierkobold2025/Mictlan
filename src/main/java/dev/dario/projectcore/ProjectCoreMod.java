@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class ProjectCoreMod implements ModInitializer {
 
     /** Debe coincidir exactamente con el "id" de fabric.mod.json. */
-    public static final String MOD_ID = "projectcore";
+    public static final String MOD_ID = "mictlan";
 
     /**
      * Logger compartido para todo el mod. Usar siempre este en vez de
@@ -32,6 +32,6 @@ public class ProjectCoreMod implements ModInitializer {
         // ModInitializer.onInitialize() es una API real de Fabric Loader
         // (net.fabricmc.api.ModInitializer), no client-side: corre tanto
         // en servidor dedicado como en cliente/integrated server.
-        LOGGER.info("[ProjectCore] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
+        LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
     }
 }

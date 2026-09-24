@@ -1,4 +1,4 @@
-# ProjectCore (placeholder)
+# Mictlan
 
 Esqueleto minimo de un mod Fabric para Minecraft 1.20.1. Sin Mixins, sin
 dependencia de Nexus Characters todavia. Su unico objetivo es demostrar

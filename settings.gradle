@@ -10,4 +10,4 @@ pluginManagement {
 }
 
 // Debe coincidir con el modid. Cambialo si renombras el mod.
-rootProject.name = 'projectcore'
+rootProject.name = 'mictlan'
