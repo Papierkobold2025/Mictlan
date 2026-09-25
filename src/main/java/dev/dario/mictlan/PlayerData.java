@@ -14,6 +14,9 @@ public class PlayerData {
     /** Indica si el jugador ya recibio el objeto de bienvenida. */
     private boolean hasReceivedStarterKit;
 
+    /** Indica en que era se encuentra el jugador */
+    private String era;
+
     /** Crea un registro nuevo asociado al UUID indicado. */
     public PlayerData(String playerUUID) {
         this.playerUUID = playerUUID;
@@ -29,6 +32,10 @@ public class PlayerData {
         this.hasReceivedStarterKit = hasReceivedStarterKit;
     }
 
+    public void setEra(String era) {
+        this.era = era;
+    }
+
     /** Devuelve si el jugador ya habia jugado anteriormente. */
     public boolean isHasPlayedBefore() {
         return this.hasPlayedBefore;
@@ -37,5 +44,10 @@ public class PlayerData {
     /** Devuelve si el jugador ya recibio el kit de inicio. */
     public boolean isHasReceivedStarterKit() {
         return this.hasReceivedStarterKit;
+    }
+
+    /** Devuelve el UUID del jugador */
+    public String getPlayerUUID() {
+        return this.playerUUID;
     }
 }
