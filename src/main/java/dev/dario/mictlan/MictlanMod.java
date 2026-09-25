@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.WorldSavePath;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 
 /**
  * Punto de entrada del mod. Fabric Loader instancia esta clase y llama a
@@ -38,10 +40,15 @@ public class MictlanMod implements ModInitializer {
 
     /**
      * HashSet es un método simple para almacenar valores únicos.
-     * No 
+     * No es persistente, pero nos permite almacenar los UUID de los jugadores que se han conectado durante la sesión del servidor.
      */
 
     private final Set<String> playerUUIDMap = new HashSet<>();
+
+
+    private Path mictlanDir;
+    private Path characterDir;
+    private Path playerDir;
 
     /**
      * Fabric Loader llama a este metodo una vez, durante la fase de carga del
@@ -54,22 +61,37 @@ public class MictlanMod implements ModInitializer {
         // (net.fabricmc.api.ModInitializer), no client-side: corre tanto
         // en servidor dedicado como en cliente/integrated server.
         LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
-        Path configDir = FabricLoader.getInstance().getConfigDir();
-        final boolean playerDataExists = Files.exists(Path.of(configDir.toString(), "mictlan_player_data.txt"));
 
-        // Leer el archivo de datos del jugador si existe, o crear uno nuevo si no existe
-        try {
-            if (playerDataExists) {
-                List<String> playerUUIDList = Files.readAllLines(Path.of(configDir.toString(), "mictlan_player_data.txt"));
-                playerUUIDMap.addAll(playerUUIDList);
-            } else {
-                Files.createFile(Path.of(configDir.toString(), "mictlan_player_data.txt"));
+        
+        ServerWorldEvents.LOAD.register((server,world) -> {
+            mictlanDir = server.getSavePath(WorldSavePath.ROOT).resolve("mictlan");
+            characterDir = mictlanDir.resolve("character");
+            playerDir = mictlanDir.resolve("players");
+            Path[] dirsToCreate = {characterDir, playerDir};
+            for (Path dir : dirsToCreate) {
+                try {
+                    if (!Files.exists(dir)) {
+                        Files.createDirectories(dir);
+                        LOGGER.info("[Mictlan] Directorio creado: " + dir.toString());
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("[Mictlan] No se pudo crear el directorio: " + dir.toString(), e);
+                }
             }
-        } catch (IOException e) {
-            LOGGER.error("[Mictlan] Datos del jugador no disponibles.", e);
-        };
+            final boolean playerDataExists = Files.exists(Path.of(playerDir.toString(), "mictlan_player_data.txt"));
 
-
+            // Leer el archivo de datos del jugador si existe, o crear uno nuevo si no existe
+            try {
+                if (playerDataExists) {
+                    List<String> playerUUIDList = Files.readAllLines(Path.of(playerDir.toString(), "mictlan_player_data.txt"));
+                    playerUUIDMap.addAll(playerUUIDList);
+                } else {
+                    Files.createFile(Path.of(playerDir.toString(), "mictlan_player_data.txt"));
+                }
+            } catch (IOException e) {
+                LOGGER.error("[Mictlan] Datos del jugador no disponibles.", e);
+            };
+        });
         
         // Registrar eventos de conexión y desconexión de jugadores
 
@@ -88,7 +110,7 @@ public class MictlanMod implements ModInitializer {
                 handler.getPlayer().sendMessage(welcomeMessage, false);
                     // Guardar el UUID del jugador en el archivo de datos
                     try{
-                        Files.writeString(Path.of(FabricLoader.getInstance().getConfigDir().toString(), "mictlan_player_data.txt"), playerUUID + System.lineSeparator(), java.nio.file.StandardOpenOption.APPEND);
+                        Files.writeString(Path.of(playerDir.toString(), "mictlan_player_data.txt"), playerUUID + System.lineSeparator(), java.nio.file.StandardOpenOption.APPEND);
                     } catch (IOException e) {
                         LOGGER.error("[Mictlan] No se pudo escribir los datos del jugador.", e);
                     };
