@@ -140,8 +140,8 @@ public class MictlanMod implements ModInitializer {
                     try{
                         ItemStack WelcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
                         if(handler.getPlayer().getInventory().insertStack(WelcomeItem)) {
-                            playerData.hasReceivedStarterKit(true);
-                            Files.writeString(Path.of(playerDir.toString(), playerUUID +".json"), gson.toJson(playerData));
+                            playerDataJsonReturn.hasReceivedStarterKit(true);
+                            Files.writeString(Path.of(playerDir.toString(), playerUUID +".json"), gson.toJson(playerDataJsonReturn));
                         }
                     } catch (Exception e) {
                         LOGGER.error("[Mictlan] No se pudo entregar el objeto de bienvenida al jugador.", e);
