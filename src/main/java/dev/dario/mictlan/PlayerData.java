@@ -17,6 +17,9 @@ public class PlayerData {
     /** Indica en que era se encuentra el jugador */
     private String era;
 
+
+    private String location;
+
     /** Crea un registro nuevo asociado al UUID indicado. */
     public PlayerData(String playerUUID) {
         this.playerUUID = playerUUID;
@@ -36,6 +39,9 @@ public class PlayerData {
         this.era = era;
     }
 
+    public void playerLocation(String location) {
+        this.location = location;
+    }
     /** Devuelve si el jugador ya habia jugado anteriormente. */
     public boolean isHasPlayedBefore() {
         return this.hasPlayedBefore;
