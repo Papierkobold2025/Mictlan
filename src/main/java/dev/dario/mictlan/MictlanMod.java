@@ -21,6 +21,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStopping;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtIo;
+
+import java.util.Optional;
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -114,6 +119,12 @@ public class MictlanMod implements ModInitializer {
     /** Datos de la era reconstruidos a partir de ese JSON (incluye las dos esquinas del "home"). */
     private WorldData worldChunkDataReturn;
 
+    private ServerPlayerEntity playerHandler;
+
+    private ServerWorld mundoParaTransportar;
+
+    private Path worldDataResources;
+
     /**
      * Todas las coordenadas X de chunk que hay entre las dos esquinas del "home".
      * Ejemplo: si las esquinas tienen x = 2 y x = 5, la lista sera [2, 3, 4, 5].
@@ -156,9 +167,10 @@ public class MictlanMod implements ModInitializer {
             characterDir = mictlanDir.resolve("character");
             playerDir = mictlanDir.resolve("players");
             worldData = mictlanDir.resolve("world");
+            worldDataResources = worldData.resolve("chunks");
 
             // Mantener los directorios en una lista permite crearlos de forma uniforme.
-            Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData};
+            Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData, worldDataResources};
             // Recorremos la lista, una carpeta a la vez.
             for (Path dir : dirsToCreate) {
                 // "try/catch" sirve para atrapar errores (por ejemplo, falta de permisos)
@@ -185,9 +197,10 @@ public class MictlanMod implements ModInitializer {
         // "handler" nos da acceso al jugador que acaba de entrar.
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             // Obtener la identidad y la ubicación inicial del jugador que se conecta.
-            String playerName = handler.getPlayer().getGameProfile().getName();
-            playerUUID = handler.getPlayer().getGameProfile().getId().toString();
-            playerLocation = handler.getPlayer().getPos().toString();
+            playerHandler = handler.getPlayer();
+            String playerName = playerHandler.getGameProfile().getName();
+            playerUUID = playerHandler.getGameProfile().getId().toString();
+            playerLocation = playerHandler.getPos().toString();
 
             // Crear una instancia de PlayerData para el jugador que se conecta
             playerData = new PlayerData(playerUUID);
@@ -198,7 +211,7 @@ public class MictlanMod implements ModInitializer {
 
             // Mostrar la ubicación actual como dato de prueba durante esta etapa.
             Text playerLocationTestMessage = Text.literal("Tu ubicación actual es: " + playerLocation);
-            handler.getPlayer().sendMessage(playerLocationTestMessage, false);
+            playerHandler.sendMessage(playerLocationTestMessage, false);
             // Guardamos la ubicacion dentro de los datos del jugador.
             playerData.playerLocation(playerLocation);
 
@@ -206,41 +219,22 @@ public class MictlanMod implements ModInitializer {
             if (!Files.exists(playerFilePath)) {
                 // Enviar un mensaje de bienvenida al jugador que entra por primera vez.
                 Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
-                handler.getPlayer().sendMessage(welcomeMessage, false);
+                playerHandler.sendMessage(welcomeMessage, false);
                 // Marcamos que ya jugo y guardamos su ubicacion.
                 playerDataJsonReturn = playerData;
                 playerDataJsonReturn.hasPlayedBefore(true);
                 playerDataJsonReturn.playerLocation(playerLocation);
                 // Entregar el objeto inicial y actualizar el registro si se pudo guardar.  
-                try{
-                    // Creamos 1 pala de madera como regalo de bienvenida.
-                    ItemStack WelcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
-                    // insertStack devuelve true si el objeto cupo en el inventario.
-                    if(handler.getPlayer().getInventory().insertStack(WelcomeItem)) {
-                        playerDataJsonReturn.hasReceivedStarterKit(true);
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("[Mictlan] No se pudo entregar el objeto de bienvenida al jugador.", e);
-                }
-                try{
-                    // Convertimos los datos del jugador a texto JSON y los guardamos en su archivo.
-                    Files.writeString(playerFilePath, gson.toJson(playerData));
-                } catch (IOException e) {
-                    LOGGER.error("[Mictlan] No se pudo escribir los datos del jugador.", e);
-                };
+                entregaKitInicial(playerHandler);
+                escribirDatosDelJugador();
             } else {
                 // Si el archivo SI existe, el jugador ya habia entrado antes.
                 // Enviar un mensaje distinto si el jugador ya tiene datos guardados.
-                try{
-                    // Leemos el texto JSON guardado en su archivo.
-                    playerDataJson = Files.readString(playerFilePath);
-                } catch(Exception e) {
-                    LOGGER.error("[Mictlan] No se pudieron leer contenidos del archivo del jugador!");
-                }
+                leerDatosDelJugador(playerHandler);
                 // Convertimos ese texto JSON de vuelta a un objeto PlayerData.
                 playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
                 Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
-                handler.getPlayer().sendMessage(welcomeBackMessage, false);
+                playerHandler.sendMessage(welcomeBackMessage, false);
                 playerDataJsonReturn.hasPlayedBefore(true);
                 // Revisamos si ya recibio el regalo de bienvenida en otra ocasion.
                 boolean hasReceivedStarterKit = playerDataJsonReturn.isHasReceivedStarterKit();
@@ -249,21 +243,10 @@ public class MictlanMod implements ModInitializer {
                 // Si todavia no recibio el regalo (por ejemplo, tenia el inventario lleno), se lo damos ahora.
                 if(!hasReceivedStarterKit) {
                     // Entregar el objeto inicial pendiente y guardar el nuevo estado.
-                    try{
-                        ItemStack WelcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
-                        if(handler.getPlayer().getInventory().insertStack(WelcomeItem)) {
-                            playerDataJsonReturn.hasReceivedStarterKit(true);
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error("[Mictlan] No se pudo entregar el objeto de bienvenida al jugador.", e);
-                    }
+                    entregaKitInicial(playerHandler);
                 }
                 // Guardamos los datos actualizados del jugador en su archivo.
-                try{
-                    Files.writeString(playerFilePath, gson.toJson(playerDataJsonReturn));
-                } catch (Exception e) {
-                    LOGGER.error("[Mictlan] Datos no escritor a disco!");
-                }
+                escribirDatosDelJugador();
             };
             // Si todavia no existe el archivo de configuracion, lo creamos con la era actual.
             if (!Files.exists(mictlanConfigFile)) {
@@ -275,7 +258,7 @@ public class MictlanMod implements ModInitializer {
             }
             // Le decimos al jugador en que era esta.
             Text eraMessage = Text.literal("Te encuentras en la era " + eraActual);
-            handler.getPlayer().sendMessage(eraMessage, false);
+            playerHandler.sendMessage(eraMessage, false);
 
             // Mensaje en la consola del servidor (el jugador no lo ve).
             LOGGER.info("[Mictlan] " + playerName + " se conecto.");
@@ -289,26 +272,19 @@ public class MictlanMod implements ModInitializer {
         // Este codigo se ejecuta cada vez que un jugador sale del servidor.
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             // Buscamos el archivo del jugador usando su UUID.
-            playerUUID = handler.getPlayer().getGameProfile().getId().toString();
+            playerHandler = handler.getPlayer();
+            playerUUID = playerHandler.getGameProfile().getId().toString();
             playerFilePath = Path.of(playerDir.toString(), playerUUID +".json");
             // Leemos lo que ya teniamos guardado de este jugador.
-            try{
-                playerDataJson = Files.readString(playerFilePath);
-            } catch(Exception e) {
-                LOGGER.error("[Mictlan] No se pudieron leer contenidos del archivo del jugador!");
-            }
+            leerDatosDelJugador(handler.getPlayer());
             // Tomamos la posicion donde el jugador se desconecto
             // y la guardamos en sus datos.
-            playerLocation = handler.getPlayer().getPos().toString();
+            playerLocation = playerHandler.getPos().toString();
             playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
             playerDataJsonReturn.playerLocation(playerLocation);
             // Escribimos los datos actualizados de vuelta en el archivo.
-            try{
-                Files.writeString(playerFilePath, gson.toJson(playerDataJsonReturn));
-            } catch (Exception e) {
-                LOGGER.error("[Mictlan] Datos no escritor a disco!");
-            }
-            String playerName = handler.getPlayer().getGameProfile().getName();        
+            escribirDatosDelJugador();
+            String playerName = playerHandler.getGameProfile().getName();        
             LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
         }); 
 
@@ -410,6 +386,19 @@ public class MictlanMod implements ModInitializer {
                             // Mostramos en la consola la lista completa de chunks (para depurar).
                             LOGGER.info("[Mictlan] " + totalChunkPosCount);
                             context.getSource().sendFeedback(() -> Text.literal("Tu casa se ha guardado exitosamente"), false);
+                            for(ChunkPos chunks : totalChunkPosCount) {
+                                Path chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunk.x + "" + chunk.z + ".nbt");
+                                mundoParaTransportar = context.getSource().getWorld();
+                                Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
+                                if(datosChunk.isPresent()) {
+                                    LOGGER.info("[Mictlan] " + datosChunk.get().getKeys());
+                                    try{
+                                        NbtIo.writeCompressed(datosChunk.get(), chunkTransportDir.toFile());
+                                    } catch(IOException e) {
+                                        LOGGER.error("[Mictlan] Datos de Chunk no pudieron ser guardados en disco!");
+                                    }
+                                } 
+                            }
                         }
                         return 1;
                     })
@@ -446,4 +435,38 @@ public class MictlanMod implements ModInitializer {
             );
         });
     };
+    /**
+     * -------------------------------------------------------------------------
+     * HELPERS
+     * -------------------------------------------------------------------------
+     */
+
+    private void entregaKitInicial(ServerPlayerEntity jugador) {
+        // Entregar el objeto inicial pendiente y guardar el nuevo estado.
+        try{
+            ItemStack WelcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
+            if(playerHandler.getInventory().insertStack(WelcomeItem)) {
+                playerDataJsonReturn.hasReceivedStarterKit(true);
+            }
+        } catch (Exception e) {
+            LOGGER.error("[Mictlan] No se pudo entregar el objeto de bienvenida al jugador.", e);
+        }
+    };
+
+    private void leerDatosDelJugador(ServerPlayerEntity jugador) {
+        try{
+            // Leemos el texto JSON guardado en su archivo.
+            playerDataJson = Files.readString(playerFilePath);
+        } catch(Exception e) {
+            LOGGER.error("[Mictlan] No se pudieron leer contenidos del archivo del jugador!");
+        }
+
+    };
+    private void escribirDatosDelJugador() {
+        try{
+            Files.writeString(playerFilePath, gson.toJson(playerDataJsonReturn));
+        } catch (Exception e) {
+            LOGGER.error("[Mictlan] Datos no escritos a disco!");
+        }
+    }
 }
