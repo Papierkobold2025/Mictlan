@@ -166,6 +166,10 @@ public class MictlanMod implements ModInitializer {
 
     private Path characterFilePath;
 
+    private Path chunkTransportDir;
+
+    private ChunkPos chunks;
+
     /**
      * Todas las coordenadas X de chunk que hay entre las dos esquinas del "home".
      * Ejemplo: si las esquinas tienen x = 2 y x = 5, la lista sera [2, 3, 4, 5].
@@ -232,6 +236,17 @@ public class MictlanMod implements ModInitializer {
                     LOGGER.error("[Mictlan] No se pudo crear el directorio: " + dir.toString(), e);
                 }
             }
+            
+            Path chunksNewHome = Path.of(worldDataResources.toString());
+
+            if(Files.exists(Path.of(worldDataResources.toString()))) {
+                try {
+                    NbtIo.readCompressed(null)
+                }
+            }
+
+            chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
+
         });
         
         /**
@@ -456,7 +471,7 @@ public class MictlanMod implements ModInitializer {
                              */
                             for(ChunkPos chunks : totalChunkPosCount) {
                                 // Un archivo por chunk, por ejemplo: chunks/Chunk_3 -7.nbt
-                                Path chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
+                                chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
                                 // El mundo (dimension) donde estaba el jugador al usar el comando.
                                 mundoParaTransportar = context.getSource().getWorld();
                                 // threadedAnvilChunkStorage es la parte del servidor que lee y
