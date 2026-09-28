@@ -19,6 +19,8 @@ public class WorldData {
     /** La esquina opuesta de la zona "home". */
     private ChunkPos mictlanHomeChunkFinish;
 
+    private boolean homeChunksPasted;
+
     /** Crea los datos de una era nueva, todavia sin zona "home". */
     public WorldData(String era) {
         this.era = era;
@@ -28,6 +30,10 @@ public class WorldData {
     public void mictlanHomeChunks(ChunkPos mictlanHomeChunkStart, ChunkPos mictlanHomeChunkFinish) {
         this.mictlanHomeChunkStart = mictlanHomeChunkStart;
         this.mictlanHomeChunkFinish = mictlanHomeChunkFinish;
+    }
+
+    public void homeChunkPasted(boolean homeChunkPasted) {
+        this.homeChunksPasted = homeChunkPasted;
     }
 
     /** Devuelve la primera esquina de la zona "home". */

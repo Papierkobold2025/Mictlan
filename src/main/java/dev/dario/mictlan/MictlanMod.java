@@ -164,6 +164,8 @@ public class MictlanMod implements ModInitializer {
     /** Mundo (dimension) del que se van a copiar los chunks de la zona "home". */
     private ServerWorld mundoParaTransportar;
 
+    private Path characterFilePath;
+
     /**
      * Todas las coordenadas X de chunk que hay entre las dos esquinas del "home".
      * Ejemplo: si las esquinas tienen x = 2 y x = 5, la lista sera [2, 3, 4, 5].
@@ -367,7 +369,7 @@ public class MictlanMod implements ModInitializer {
                     .executes(context ->{
                         // Apunta a la carpeta de personajes (de momento no se usa mas abajo).
                         // OJO: esto sobreescribe la ruta del archivo del jugador guardada al conectarse.
-                        playerFilePath = Path.of(characterDir.toString());
+                        characterFilePath = Path.of(characterDir.toString());
                         // Obtenemos el jugador que escribio el comando y el chunk donde esta parado.
                         ServerPlayerEntity player = context.getSource().getPlayer();
                         ChunkPos chunk = player.getChunkPos();
