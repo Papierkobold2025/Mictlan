@@ -8,19 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.ServerTask;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.io.IOException;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStopping;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -28,7 +28,6 @@ import net.minecraft.nbt.NbtIo;
 import java.util.Optional;
 
 import com.google.gson.Gson;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -113,9 +112,6 @@ public class MictlanMod implements ModInitializer {
     /** Objeto con los datos de la era actual (nombre de la era, chunks, etc.). */
     WorldData CurrentEra = new WorldData(eraActual);
 
-    /** Reservado para guardar los chunks de la era actual (todavia no se usa). */
-    private String currentEraChunks;
-
     /**
      * -------------------------------------------------------------------------
      * DATOS DEL JUGADOR
@@ -164,11 +160,17 @@ public class MictlanMod implements ModInitializer {
     /** Mundo (dimension) del que se van a copiar los chunks de la zona "home". */
     private ServerWorld mundoParaTransportar;
 
+    /** Ruta a la carpeta de personajes (mictlan/character). Se asigna en /mictlan home, de momento no se usa. */
     private Path characterFilePath;
 
+    /**
+     * Ruta al archivo .nbt del chunk que se esta copiando (por ejemplo: chunks/Chunk_3 -7.nbt).
+     * Se asigna en /mictlan home; hasta entonces vale null.
+     */
     private Path chunkTransportDir;
 
-    private ChunkPos chunks;
+    /** Posicion (x, z) del chunk que se esta pegando en el mundo nuevo al cargar el mundo. */
+    private ChunkPos posicionChunksMundoNuevo;
 
     /**
      * Todas las coordenadas X de chunk que hay entre las dos esquinas del "home".
@@ -236,17 +238,41 @@ public class MictlanMod implements ModInitializer {
                     LOGGER.error("[Mictlan] No se pudo crear el directorio: " + dir.toString(), e);
                 }
             }
-            
-            Path chunksNewHome = Path.of(worldDataResources.toString());
 
-            if(Files.exists(Path.of(worldDataResources.toString()))) {
-                try {
-                    NbtIo.readCompressed(null)
+            /**
+             * -----------------------------------------------------------------
+             * PEGADO DE LOS CHUNKS GUARDADOS EN EL MUNDO NUEVO
+             * -----------------------------------------------------------------
+             * Si ya hay chunks copiados con /mictlan home, los leemos de
+             * mictlan/world/chunks y los escribimos en el mundo que se carga.
+             */
+            // Revisamos la carpeta (en disco) y no chunkTransportDir (en memoria),
+            // porque la variable vuelve a ser null cada vez que se reinicia el servidor.
+            // Si la carpeta existe pero esta vacia, el for de abajo simplemente no hace nada.
+            if(Files.exists(worldDataResources)) {
+                // ServerWorldEvents.LOAD se ejecuta una vez por cada dimension
+                // (Overworld, Nether, End); solo pegamos los chunks en el Overworld.
+                if(world.getRegistryKey() == World.OVERWORLD){
+                    // newDirectoryStream recorre la carpeta, pero solo los archivos que
+                    // terminan en .nbt. Al ir dentro de "try (...)" se cierra solo al terminar.
+                    try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(worldDataResources, "*.nbt")) {
+                        for (Path archivo : oldWorldDataResources) {
+                            // Leemos el NBT comprimido que guardamos con /mictlan home.
+                            NbtCompound datos = NbtIo.readCompressed(archivo.toFile());
+                            // El propio NBT del chunk trae su posicion en las llaves "xPos" y "zPos",
+                            // asi no dependemos del nombre del archivo.
+                            posicionChunksMundoNuevo = new ChunkPos(datos.getInt("xPos"), datos.getInt("zPos"));
+                            // setNbt es lo contrario de getNbt: escribe esos datos en los
+                            // archivos .mca de la region, en la misma posicion.
+                            world.getChunkManager().threadedAnvilChunkStorage.setNbt(posicionChunksMundoNuevo, datos);
+                        }
+                    } catch (IOException e) {
+                        // "e" guarda el error que ocurrio; al pasarla al LOGGER se ve la causa completa.
+                        // Si falla al abrir la carpeta, posicionChunksMundoNuevo puede seguir en null.
+                        LOGGER.error("[Mictlan] No se pudo escribir " + posicionChunksMundoNuevo + " en mundo nuevo!", e);
+                    }
                 }
             }
-
-            chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
-
         });
         
         /**
@@ -383,7 +409,6 @@ public class MictlanMod implements ModInitializer {
                 .then(CommandManager.literal("home")
                     .executes(context ->{
                         // Apunta a la carpeta de personajes (de momento no se usa mas abajo).
-                        // OJO: esto sobreescribe la ruta del archivo del jugador guardada al conectarse.
                         characterFilePath = Path.of(characterDir.toString());
                         // Obtenemos el jugador que escribio el comando y el chunk donde esta parado.
                         ServerPlayerEntity player = context.getSource().getPlayer();
