@@ -387,7 +387,7 @@ public class MictlanMod implements ModInitializer {
                             LOGGER.info("[Mictlan] " + totalChunkPosCount);
                             context.getSource().sendFeedback(() -> Text.literal("Tu casa se ha guardado exitosamente"), false);
                             for(ChunkPos chunks : totalChunkPosCount) {
-                                Path chunkTransportDir = Path.of(worldDataResources.toString(), "Chunk_" + chunk.x + "" + chunk.z + ".nbt");
+                                Path chunkTransportDir = Path.of(worldDataResources.toString(), "Chunks_" + chunks.x + " " + chunks.z + ".nbt");
                                 mundoParaTransportar = context.getSource().getWorld();
                                 Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
                                 if(datosChunk.isPresent()) {
