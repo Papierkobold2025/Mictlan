@@ -23,10 +23,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtElement;
+import java.util.List;
+import net.minecraft.entity.Entity;
 
 import java.util.Optional;
 
 import com.google.gson.Gson;
+import net.minecraft.util.math.Box;
 
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -142,6 +145,10 @@ public class MictlanMod implements ModInitializer {
 
     private Path chunkTransportDir;
 
+    private Path mictlanCoreEntitiesPath;
+
+    private Path mictlanCoreEntitiesFile;
+
     /** Posicion destino del chunk que se pega en el mundo nuevo. */
     private ChunkPos posicionChunksMundoNuevo;
 
@@ -165,6 +172,12 @@ public class MictlanMod implements ModInitializer {
     /** Todos los chunks del "home" (producto X * Z). */
     private ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
 
+    private Box caja;
+
+    private List<Entity> entidadesDelChunk;
+
+    private NbtCompound entidadesAGuardar;
+
     /**
      * -------------------------------------------------------------------------
      * INICIALIZACION DEL MOD
@@ -182,46 +195,48 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
         ServerWorldEvents.LOAD.register((server,world) -> {
-            mictlanConfigDir = FabricLoader.getInstance().getConfigDir().resolve("mictlan");
-            mictlanConfigFile = Path.of(mictlanConfigDir.toString(), "mictlan.json" );
-            mictlanDir = server.getSavePath(WorldSavePath.ROOT).resolve("mictlan");
-            characterDir = mictlanDir.resolve("character");
-            playerDir = mictlanDir.resolve("players");
-            worldData = mictlanDir.resolve("world");
-            worldDataResources = worldData.resolve("chunks");
-            mictlanCorePath = FabricLoader.getInstance().getGameDir().resolve(MOD_ID);
-            mictlanCoreDataPath = mictlanCorePath.resolve("data");
+            if(world.getRegistryKey() == World.OVERWORLD){
+                mictlanConfigDir = FabricLoader.getInstance().getConfigDir().resolve("mictlan");
+                mictlanConfigFile = Path.of(mictlanConfigDir.toString(), "mictlan.json" );
+                mictlanDir = server.getSavePath(WorldSavePath.ROOT).resolve("mictlan");
+                characterDir = mictlanDir.resolve("character");
+                playerDir = mictlanDir.resolve("players");
+                worldData = mictlanDir.resolve("world");
+                mictlanCorePath = FabricLoader.getInstance().getGameDir().resolve("mictlan");
+                mictlanCoreDataPath = mictlanCorePath.resolve("data");
+                mictlanCoreEntitiesPath = mictlanCorePath.resolve("entities");
 
-            Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData, worldDataResources, mictlanCorePath, mictlanCoreDataPath};
-            for (Path dir : dirsToCreate) {
-                try {
-                    if (!Files.exists(dir)) {
-                        Files.createDirectories(dir);
-                        LOGGER.info("[Mictlan] Directorio creado: " + dir.toString());
+                Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData, worldDataResources, mictlanCorePath, mictlanCoreDataPath, mictlanCoreEntitiesPath};
+                for (Path dir : dirsToCreate) {
+                    try {
+                        if (!Files.exists(dir)) {
+                            Files.createDirectories(dir);
+                            LOGGER.info("[Mictlan] Directorio creado: " + dir.toString());
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("[Mictlan] No se pudo crear el directorio: " + dir.toString(), e);
                     }
-                } catch (IOException e) {
-                    LOGGER.error("[Mictlan] No se pudo crear el directorio: " + dir.toString(), e);
                 }
-            }
 
-            /**
-             * -----------------------------------------------------------------
-             * PEGADO DE LOS CHUNKS GUARDADOS EN EL MUNDO NUEVO
-             * -----------------------------------------------------------------
-             * Si ya hay chunks copiados con /mictlan home, los leemos de
-             * mictlan/world/chunks y los escribimos en el mundo que se carga.
-             */
-            // Sin archivo de configuracion no hay nada que pegar.
-            if(!Files.exists(mictlanConfigFile)){
-                return;
-            };
-            try {
-                readMictlanConfigFile = Files.readString(mictlanConfigFile);
-            } catch (Exception e) {
-                LOGGER.error("[Mictlan] Archivo de configuracion no pudo ser leido", e);
+                /**
+                 * -----------------------------------------------------------------
+                 * PEGADO DE LOS CHUNKS GUARDADOS EN EL MUNDO NUEVO
+                 * -----------------------------------------------------------------
+                 * Si ya hay chunks copiados con /mictlan home, los leemos de
+                 * mictlan/world/chunks y los escribimos en el mundo que se carga.
+                 */
+                // Sin archivo de configuracion no hay nada que pegar.
+                if(!Files.exists(mictlanConfigFile)){
+                    return;
+                };
+                try {
+                    readMictlanConfigFile = Files.readString(mictlanConfigFile);
+                } catch (Exception e) {
+                    LOGGER.error("[Mictlan] Archivo de configuracion no pudo ser leido", e);
+                }
+                respuestaArcihvoDeConfiguracion = gson.fromJson(readMictlanConfigFile, CurrentEra.getClass());
+                pegadoDeChunksEnConfiguracion(world);
             }
-            respuestaArcihvoDeConfiguracion = gson.fromJson(readMictlanConfigFile, CurrentEra.getClass());
-            pegadoDeChunksEnConfiguracion(world);
         });
 
         /**
@@ -391,7 +406,27 @@ public class MictlanMod implements ModInitializer {
                              */
                             for(ChunkPos chunks : totalChunkPosCount) {
                                 mictlanCoreDataFile = Path.of(mictlanCoreDataPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
+                                mictlanCoreEntitiesFile = Path.of(mictlanCoreEntitiesPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
                                 mundoParaTransportar = context.getSource().getWorld();
+                                //Configuracion para el transporte de entidades
+                                caja = new Box(chunks.getStartX(), mundoParaTransportar.getBottomY(), chunks.getStartZ(), chunks.getEndX() + 1, mundoParaTransportar.getTopY(), chunks.getEndZ() +1);
+                                entidadesDelChunk = mundoParaTransportar.getOtherEntities(null, caja);
+                                NbtList listaEntidades = new NbtList();
+                                for (Entity entity : entidadesDelChunk) {
+                                        entidadesAGuardar = new NbtCompound();
+                                    if (entity.saveSelfNbt(entidadesAGuardar)) {
+                                            listaEntidades.add(entidadesAGuardar);
+                                    }
+                                }
+
+                                NbtCompound archivoEntidades = new NbtCompound();
+                                archivoEntidades.put("entidades", listaEntidades);
+
+                                try {
+                                    NbtIo.writeCompressed(archivoEntidades, mictlanCoreEntitiesFile.toFile());
+                                } catch (Exception e) {
+                                    LOGGER.error("Entidades del Chunk " + chunks.x + " " + chunks.z + " no se pudieron guardar.", e);
+                                }
                                 // Vacio si el chunk nunca se ha guardado en disco.
                                 Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
                                 if(datosChunk.isPresent()) {
@@ -488,25 +523,23 @@ public class MictlanMod implements ModInitializer {
         if(respuestaArcihvoDeConfiguracion.getHomeChunksPasted()) {
                 // LOAD corre una vez por dimension; solo Overworld.
                 int counter = 0;
-                if(mundo.getRegistryKey() == World.OVERWORLD){
-                    try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(mictlanCoreDataPath, "*.nbt")) {
-                        for (Path archivo : oldWorldDataResources) {
-                            NbtCompound datos = NbtIo.readCompressed(archivo.toFile());
-                            // Posicion tomada del propio NBT, no del nombre del archivo.
-                            posicionChunksMundoNuevo = new ChunkPos(datos.getInt("xPos"), datos.getInt("zPos"));
+                try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(mictlanCoreDataPath, "*.nbt")) {
+                    for (Path archivo : oldWorldDataResources) {
+                        NbtCompound datos = NbtIo.readCompressed(archivo.toFile());
+                        // Posicion tomada del propio NBT, no del nombre del archivo.
+                        posicionChunksMundoNuevo = new ChunkPos(datos.getInt("xPos"), datos.getInt("zPos"));
 
-                            // Vacia el inventario de los block entities.
-                            entidades = datos.getList("block_entities", NbtElement.COMPOUND_TYPE);
-                            for(NbtList entities = entidades; counter < entities.size(); counter ++) {
-                                entities.getCompound(counter).remove("Items");
-                            }
-                            mundo.getChunkManager().threadedAnvilChunkStorage.setNbt(posicionChunksMundoNuevo, datos);
-                            Files.delete(archivo);
-                            counter = 0;
+                        // Vacia el inventario de los block entities.
+                        entidades = datos.getList("block_entities", NbtElement.COMPOUND_TYPE);
+                        for(NbtList entities = entidades; counter < entities.size(); counter ++) {
+                            entities.getCompound(counter).remove("Items");
                         }
-                    } catch (IOException e) {
-                        LOGGER.error("[Mictlan] No se pudo escribir " + posicionChunksMundoNuevo + " en mundo nuevo!", e);
+                        mundo.getChunkManager().threadedAnvilChunkStorage.setNbt(posicionChunksMundoNuevo, datos);
+                        Files.delete(archivo);
+                        counter = 0;
                     }
+                } catch (IOException e) {
+                        LOGGER.error("[Mictlan] No se pudo escribir " + posicionChunksMundoNuevo + " en mundo nuevo!", e);
                 }
                 CurrentEra.homeChunkPasted(false);
                 escribirDatosDeConfiguracion();
