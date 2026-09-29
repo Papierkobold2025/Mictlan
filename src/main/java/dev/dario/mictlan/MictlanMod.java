@@ -81,9 +81,6 @@ public class MictlanMod implements ModInitializer {
     /** world/<era>.json */
     private Path worldDataChunks;
 
-    /** mictlan/world/chunks */
-    private Path worldDataResources;
-
     /**
      * -------------------------------------------------------------------------
      * DATOS DE LA ERA
@@ -206,7 +203,7 @@ public class MictlanMod implements ModInitializer {
                 mictlanCoreDataPath = mictlanCorePath.resolve("data");
                 mictlanCoreEntitiesPath = mictlanCorePath.resolve("entities");
 
-                Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData, worldDataResources, mictlanCorePath, mictlanCoreDataPath, mictlanCoreEntitiesPath};
+                Path[] dirsToCreate = {characterDir, playerDir, mictlanConfigDir, worldData, mictlanCorePath, mictlanCoreDataPath, mictlanCoreEntitiesPath};
                 for (Path dir : dirsToCreate) {
                     try {
                         if (!Files.exists(dir)) {
