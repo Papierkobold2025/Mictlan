@@ -46,6 +46,10 @@ public class WorldData {
         return this.mictlanHomeChunkFinish;
     }
 
+    public boolean getHomeChunksPasted() {
+        return this.homeChunksPasted;
+    }
+
     /** Devuelve el nombre de la era. */
     public String getEra() {
         return this.era;
