@@ -84,22 +84,10 @@ public class MictlanMod implements ModInitializer {
     /** Estado de la era en memoria; se escribe en mictlan.json. */
     public static WorldData CurrentEra = new WorldData(eraActual);
 
-    /**
-     * -------------------------------------------------------------------------
-     * DATOS DEL JUGADOR
-     * -------------------------------------------------------------------------
-     */
-
-    /** Ultimo jugador que se conecto / desconecto. */
-    private ServerPlayerEntity playerHandler;
-
-    private String playerUUID;
+    public static ServerPlayNetworkHandler serverHandler;
 
     /** Plantilla con el UUID; solo se usa para getClass() y jugadores nuevos. */
     PlayerData playerData;
-
-    /** JSON crudo leido de players/<uuid>.json. */
-    private String playerDataJson = "";
 
     /**
      * -------------------------------------------------------------------------
@@ -179,6 +167,7 @@ public class MictlanMod implements ModInitializer {
          */
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            serverHandler = handler;
             PlayerConnection.playerConnection(handler);
         });
 
@@ -188,15 +177,7 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            playerHandler = handler.getPlayer();
-            playerUUID = playerHandler.getGameProfile().getId().toString();
-            PlayerConnection.playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
-            helperLeerDatosDelJugador.leerDatosDelJugador(handler.getPlayer());
-            // Actualiza la ultima posicion y guarda.
-            PlayerConnection.playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
-            helperEscribirDatosDelJugador.escribirDatosDelJugador();
-            String playerName = playerHandler.getGameProfile().getName();
-            LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
+            PlayerDisconnection.playerDisconnection();
         });
 
         /**
