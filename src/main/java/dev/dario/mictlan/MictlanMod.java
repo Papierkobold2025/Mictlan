@@ -25,6 +25,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtElement;
 import java.util.List;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class MictlanMod implements ModInitializer {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    /** Serializador JSON compartido para jugadores y configuracion. */
     private Gson gson = new Gson();
 
     /**
@@ -81,6 +83,24 @@ public class MictlanMod implements ModInitializer {
     /** world/<era>.json */
     private Path worldDataChunks;
 
+    /** config/mictlan/mictlan.json */
+    private Path mictlanConfigFile;
+
+    /** <juego>/mictlan: raiz compartida entre mundos (sobrevive al cambio de era). */
+    private Path mictlanCorePath;
+
+    /** <juego>/mictlan/data: .nbt de los chunks del "home". */
+    private Path mictlanCoreDataPath;
+
+    /** data/Chunk_<x> <z>.nbt */
+    private Path mictlanCoreDataFile;
+
+    /** <juego>/mictlan/entities: .nbt de las entidades del "home". */
+    private Path mictlanCoreEntitiesPath;
+
+    /** entities/Chunk_<x> <z>.nbt */
+    private Path mictlanCoreEntitiesFile;
+
     /**
      * -------------------------------------------------------------------------
      * DATOS DE LA ERA
@@ -90,7 +110,14 @@ public class MictlanMod implements ModInitializer {
     /** Debe declararse antes de CurrentEra (orden de inicializacion). */
     private String eraActual= "MEDIEVAL";
 
+    /** Estado de la era en memoria; se escribe en mictlan.json. */
     WorldData CurrentEra = new WorldData(eraActual);
+
+    /** Contenido de mictlan.json leido al cargar el mundo. */
+    private WorldData respuestaArchivoDeConfiguracion;
+
+    /** JSON crudo de mictlan.json. */
+    private String readMictlanConfigFile;
 
     /**
      * -------------------------------------------------------------------------
@@ -98,12 +125,15 @@ public class MictlanMod implements ModInitializer {
      * -------------------------------------------------------------------------
      */
 
+    /** Ultimo jugador que se conecto / desconecto. */
     private ServerPlayerEntity playerHandler;
 
     private String playerUUID;
 
+    /** Posicion (x, y, z) como texto. */
     private String playerLocation;
 
+    /** Plantilla con el UUID; solo se usa para getClass() y jugadores nuevos. */
     PlayerData playerData;
 
     /** JSON crudo leido de players/<uuid>.json. */
@@ -111,10 +141,6 @@ public class MictlanMod implements ModInitializer {
 
     /** Datos del jugador a escribir / leidos de disco. */
     private PlayerData playerDataJsonReturn;
-
-    private WorldData respuestaArcihvoDeConfiguracion;
-
-    private String readMictlanConfigFile;
 
     /**
      * -------------------------------------------------------------------------
@@ -125,13 +151,16 @@ public class MictlanMod implements ModInitializer {
     /** Usos de /mictlan home; impar = primera esquina, par = segunda. */
     private int commandExecuted = 0;
 
+    /** Esquina marcada en el primer /mictlan home. */
     private ChunkPos firstChunk;
 
+    /** Esquina marcada en el segundo /mictlan home. */
     private ChunkPos secondChunk;
 
     /** JSON crudo de world/<era>.json. */
     private String worldChunkData = "";
 
+    /** world/<era>.json ya parseado. */
     private WorldData worldChunkDataReturn;
 
     /** Dimension origen de los chunks del "home". */
@@ -140,25 +169,11 @@ public class MictlanMod implements ModInitializer {
     /** Sin uso por ahora. */
     private Path characterFilePath;
 
-    private Path chunkTransportDir;
-
-    private Path mictlanCoreEntitiesPath;
-
-    private Path mictlanCoreEntitiesFile;
-
     /** Posicion destino del chunk que se pega en el mundo nuevo. */
     private ChunkPos posicionChunksMundoNuevo;
 
+    /** "block_entities" del chunk que se esta pegando (cofres, hornos...). */
     private NbtList entidades;
-
-
-    private Path mictlanConfigFile;
-
-    private Path mictlanCorePath;
-
-    private Path mictlanCoreDataPath;
-
-    private Path mictlanCoreDataFile;
 
     /** Coordenadas X entre las dos esquinas (inclusive). */
     private ArrayList<Integer> homeChunksX = new ArrayList<>();
@@ -169,11 +184,32 @@ public class MictlanMod implements ModInitializer {
     /** Todos los chunks del "home" (producto X * Z). */
     private ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
 
+    /**
+     * -------------------------------------------------------------------------
+     * TRANSPORTE DE ENTIDADES
+     * -------------------------------------------------------------------------
+     */
+
+    /** Volumen de un chunk completo (de getBottomY a getTopY). */
     private Box caja;
 
+    /** Entidades encontradas dentro de la caja del chunk. */
     private List<Entity> entidadesDelChunk;
 
+    /** NBT de una sola entidad al copiarla. */
     private NbtCompound entidadesAGuardar;
+
+    /** Raiz del .nbt de entidades: { "entidades": [ ... ] }. */
+    private NbtCompound archivoEntidades;
+
+    /** Lista "entidades" leida de un .nbt al pegar. */
+    private NbtList recibirEntidades;
+
+    /** NBT de una sola entidad al pegarla. */
+    private NbtCompound entidadGuardada;
+
+    /** Entidad reconstruida; vacio si el tipo no existe en esta version. */
+    private Optional<Entity> pegarEntidadesEnMundo;
 
     /**
      * -------------------------------------------------------------------------
@@ -217,10 +253,11 @@ public class MictlanMod implements ModInitializer {
 
                 /**
                  * -----------------------------------------------------------------
-                 * PEGADO DE LOS CHUNKS GUARDADOS EN EL MUNDO NUEVO
+                 * PEGADO DE CHUNKS Y ENTIDADES GUARDADOS EN EL MUNDO NUEVO
                  * -----------------------------------------------------------------
                  * Si ya hay chunks copiados con /mictlan home, los leemos de
-                 * mictlan/world/chunks y los escribimos en el mundo que se carga.
+                 * <juego>/mictlan/data (y sus entidades de <juego>/mictlan/entities)
+                 * y los escribimos en el mundo que se carga.
                  */
                 // Sin archivo de configuracion no hay nada que pegar.
                 if(!Files.exists(mictlanConfigFile)){
@@ -231,8 +268,10 @@ public class MictlanMod implements ModInitializer {
                 } catch (Exception e) {
                     LOGGER.error("[Mictlan] Archivo de configuracion no pudo ser leido", e);
                 }
-                respuestaArcihvoDeConfiguracion = gson.fromJson(readMictlanConfigFile, CurrentEra.getClass());
+                respuestaArchivoDeConfiguracion = gson.fromJson(readMictlanConfigFile, CurrentEra.getClass());
                 pegadoDeChunksEnConfiguracion(world);
+                // Primero el terreno, despues las entidades encima.
+                pegadoDeEntidadesEnNuevoMundo(world);
             }
         });
 
@@ -399,24 +438,27 @@ public class MictlanMod implements ModInitializer {
                              * Por cada chunk de la zona pedimos a Minecraft sus datos en
                              * formato NBT (el mismo formato en el que el juego guarda el
                              * mundo) y los escribimos en un archivo propio dentro de
-                             * mictlan/world/chunks, para poder llevarlos a otra era despues.
+                             * <juego>/mictlan/data, para poder llevarlos a otra era despues.
+                             * Las entidades van aparte, en <juego>/mictlan/entities, porque
+                             * Minecraft no las guarda dentro del NBT del chunk.
                              */
                             for(ChunkPos chunks : totalChunkPosCount) {
                                 mictlanCoreDataFile = Path.of(mictlanCoreDataPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
                                 mictlanCoreEntitiesFile = Path.of(mictlanCoreEntitiesPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
                                 mundoParaTransportar = context.getSource().getWorld();
-                                //Configuracion para el transporte de entidades
+                                // Entidades: se buscan por volumen (+1 porque getEnd es inclusivo).
                                 caja = new Box(chunks.getStartX(), mundoParaTransportar.getBottomY(), chunks.getStartZ(), chunks.getEndX() + 1, mundoParaTransportar.getTopY(), chunks.getEndZ() +1);
                                 entidadesDelChunk = mundoParaTransportar.getOtherEntities(null, caja);
                                 NbtList listaEntidades = new NbtList();
                                 for (Entity entity : entidadesDelChunk) {
                                         entidadesAGuardar = new NbtCompound();
+                                    // false para jugadores, pasajeros y entidades removidas.
                                     if (entity.saveSelfNbt(entidadesAGuardar)) {
                                             listaEntidades.add(entidadesAGuardar);
                                     }
                                 }
 
-                                NbtCompound archivoEntidades = new NbtCompound();
+                                archivoEntidades = new NbtCompound();
                                 archivoEntidades.put("entidades", listaEntidades);
 
                                 try {
@@ -435,6 +477,7 @@ public class MictlanMod implements ModInitializer {
                                     }
                                 }
                             }
+                            // Marca pegado pendiente para el proximo mundo que se cargue.
                             CurrentEra.homeChunkPasted(true);
                             escribirDatosDeConfiguracion();
                         }
@@ -517,7 +560,7 @@ public class MictlanMod implements ModInitializer {
 
     /** Pega los .nbt guardados en el Overworld y limpia la bandera de pegado pendiente. */
     private void pegadoDeChunksEnConfiguracion(ServerWorld mundo) {
-        if(respuestaArcihvoDeConfiguracion.getHomeChunksPasted()) {
+        if(respuestaArchivoDeConfiguracion.getHomeChunksPasted()) {
                 // LOAD corre una vez por dimension; solo Overworld.
                 int counter = 0;
                 try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(mictlanCoreDataPath, "*.nbt")) {
@@ -541,5 +584,30 @@ public class MictlanMod implements ModInitializer {
                 CurrentEra.homeChunkPasted(false);
                 escribirDatosDeConfiguracion();
         }
+    };
+
+    /** Recrea en el mundo las entidades de cada .nbt de entities/ y borra el archivo. */
+    private void pegadoDeEntidadesEnNuevoMundo(ServerWorld mundo) {
+        int counter = 0;
+        try (DirectoryStream<Path> oldWorldEntityResources = Files.newDirectoryStream(mictlanCoreEntitiesPath, "*.nbt")){
+            for (Path archivo : oldWorldEntityResources) {
+                NbtCompound datos = NbtIo.readCompressed(archivo.toFile());
+                recibirEntidades = datos.getList("entidades", NbtElement.COMPOUND_TYPE);
+                for(NbtList recoleccionDeEntidades = recibirEntidades; counter < recoleccionDeEntidades.size(); counter++) {
+                    entidadGuardada = recoleccionDeEntidades.getCompound(counter);
+                    // Crea la entidad con su UUID, posicion y datos originales.
+                    pegarEntidadesEnMundo = EntityType.getEntityFromNbt(entidadGuardada, mundo);
+
+                    if(pegarEntidadesEnMundo.isPresent()) {
+                        LOGGER.info("[Mictlan] " + pegarEntidadesEnMundo.get());
+                        mundo.spawnEntityAndPassengers(pegarEntidadesEnMundo.get());
+                    }
+                }
+                Files.delete(archivo);
+                counter = 0;
+            }
+        } catch (IOException e) {
+            LOGGER.error("[Mictlan] Datos de entidades no pudieron ser escritas a mundo");
+        }
     }
-}
+} 

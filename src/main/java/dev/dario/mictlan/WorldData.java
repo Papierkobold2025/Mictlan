@@ -19,6 +19,7 @@ public class WorldData {
     /** La esquina opuesta de la zona "home". */
     private ChunkPos mictlanHomeChunkFinish;
 
+    /** true = hay chunks copiados esperando pegarse en el proximo mundo. */
     private boolean homeChunksPasted;
 
     /** Crea los datos de una era nueva, todavia sin zona "home". */
@@ -32,6 +33,7 @@ public class WorldData {
         this.mictlanHomeChunkFinish = mictlanHomeChunkFinish;
     }
 
+    /** Activa / limpia la bandera de pegado pendiente. */
     public void homeChunkPasted(boolean homeChunkPasted) {
         this.homeChunksPasted = homeChunkPasted;
     }
@@ -46,6 +48,7 @@ public class WorldData {
         return this.mictlanHomeChunkFinish;
     }
 
+    /** Devuelve si hay un pegado de chunks pendiente. */
     public boolean getHomeChunksPasted() {
         return this.homeChunksPasted;
     }
