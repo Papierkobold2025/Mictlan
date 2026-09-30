@@ -168,7 +168,7 @@ public class MictlanMod implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             serverHandler = handler;
-            PlayerConnection.playerConnection(handler);
+            PlayerConnection.playerConnection();
         });
 
         /**

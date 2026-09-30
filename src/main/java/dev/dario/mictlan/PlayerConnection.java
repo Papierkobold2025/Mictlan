@@ -4,7 +4,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import net.minecraft.text.Text;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 public class PlayerConnection {
     public static ServerPlayerEntity playerHandler;
@@ -13,8 +12,8 @@ public class PlayerConnection {
     public static Path playerFilePath;
     public static PlayerData playerDataJsonReturn;
     public static String playerDataJson = "";
-    public static void playerConnection(ServerPlayNetworkHandler handler){
-        playerHandler = handler.getPlayer();
+    public static void playerConnection(){
+        playerHandler = MictlanMod.serverHandler.getPlayer();
         String playerName = playerHandler.getGameProfile().getName();
         playerUUID = playerHandler.getGameProfile().getId().toString();
 
