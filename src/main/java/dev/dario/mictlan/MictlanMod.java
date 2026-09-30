@@ -63,9 +63,6 @@ public class MictlanMod implements ModInitializer {
      * porque antes de eso todavia no sabemos donde esta guardado el mundo.
      */
 
-    /** players/<uuid>.json */
-    private Path playerFilePath;
-
     /** world/<era>.json */
     private Path worldDataChunks;
 
@@ -82,10 +79,10 @@ public class MictlanMod implements ModInitializer {
      */
 
     /** Debe declararse antes de CurrentEra (orden de inicializacion). */
-    private String eraActual= "MEDIEVAL";
+    public static String eraActual= "MEDIEVAL";
 
     /** Estado de la era en memoria; se escribe en mictlan.json. */
-    WorldData CurrentEra = new WorldData(eraActual);
+    public static WorldData CurrentEra = new WorldData(eraActual);
 
     /**
      * -------------------------------------------------------------------------
@@ -103,9 +100,6 @@ public class MictlanMod implements ModInitializer {
 
     /** JSON crudo leido de players/<uuid>.json. */
     private String playerDataJson = "";
-
-    /** Datos del jugador a escribir / leidos de disco. */
-    private PlayerData playerDataJsonReturn;
 
     /**
      * -------------------------------------------------------------------------
@@ -185,44 +179,7 @@ public class MictlanMod implements ModInitializer {
          */
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            playerHandler = handler.getPlayer();
-            String playerName = playerHandler.getGameProfile().getName();
-            playerUUID = playerHandler.getGameProfile().getId().toString();
-
-            playerData = new PlayerData(playerUUID);
-
-            playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
-
-            // Primera conexion.
-            if (!Files.exists(playerFilePath)) {
-                Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
-                playerHandler.sendMessage(welcomeMessage, false);
-                playerDataJsonReturn = playerData;
-                playerDataJsonReturn.hasPlayedBefore(true);
-                entregaKitInicial(playerHandler);
-                escribirDatosDelJugador();
-            } else {
-                // Jugador existente.
-                leerDatosDelJugador(playerHandler);
-                playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
-                Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
-                playerHandler.sendMessage(welcomeBackMessage, false);
-                playerDataJsonReturn.hasPlayedBefore(true);
-                boolean hasReceivedStarterKit = playerDataJsonReturn.isHasReceivedStarterKit();
-                playerDataJsonReturn.setEra(eraActual);
-                // Reintento del kit (p. ej. inventario lleno la vez anterior).
-                if(!hasReceivedStarterKit) {
-                    entregaKitInicial(playerHandler);
-                }
-                escribirDatosDelJugador();
-            };
-            if (!Files.exists(WorldLoad.mictlanConfigFile)) {
-                helperEscribirDatosDeConfiguracion.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, CurrentEra);
-            }
-            Text eraMessage = Text.literal("Te encuentras en la era " + eraActual);
-            playerHandler.sendMessage(eraMessage, false);
-
-            LOGGER.info("[Mictlan] " + playerName + " se conecto.");
+            PlayerConnection.playerConnection(handler);
         });
 
         /**
@@ -233,11 +190,11 @@ public class MictlanMod implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             playerHandler = handler.getPlayer();
             playerUUID = playerHandler.getGameProfile().getId().toString();
-            playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
-            leerDatosDelJugador(handler.getPlayer());
+            PlayerConnection.playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
+            helperLeerDatosDelJugador.leerDatosDelJugador(handler.getPlayer());
             // Actualiza la ultima posicion y guarda.
-            playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
-            escribirDatosDelJugador();
+            PlayerConnection.playerDataJsonReturn = gson.fromJson(playerDataJson, playerData.getClass());
+            helperEscribirDatosDelJugador.escribirDatosDelJugador();
             String playerName = playerHandler.getGameProfile().getName();
             LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
         });
@@ -425,24 +382,25 @@ public class MictlanMod implements ModInitializer {
         }
     }
 
-    /** Lee playerFilePath en playerDataJson. */
-    private void leerDatosDelJugador(ServerPlayerEntity jugador) {
-        try{
-            playerDataJson = Files.readString(playerFilePath);
-        } catch(Exception e) {
-            LOGGER.error("[Mictlan] No se pudieron leer contenidos del archivo del jugador!");
+    public class helperLeerDatosDelJugador {
+        public static void leerDatosDelJugador(ServerPlayerEntity jugador) {
+            try{
+                PlayerConnection.playerDataJson = Files.readString(PlayerConnection.playerFilePath);
+            } catch(Exception e) {
+                LOGGER.error("[Mictlan] No se pudieron leer contenidos del archivo del jugador!");
+            }            
         }
+    }
 
-    };
-
-    /** Escribe playerDataJsonReturn en playerFilePath (sobrescribe). */
-    private void escribirDatosDelJugador() {
-        try{
-            Files.writeString(playerFilePath, gson.toJson(playerDataJsonReturn));
-        } catch (Exception e) {
-            LOGGER.error("[Mictlan] Datos no escritos a disco!");
+    public class helperEscribirDatosDelJugador {
+        public static void escribirDatosDelJugador() {
+            try{
+                Files.writeString(PlayerConnection.playerFilePath, gson.toJson(PlayerConnection.playerDataJsonReturn));
+            } catch (Exception e) {
+                LOGGER.error("[Mictlan] Datos no escritos a disco!");
+            }            
         }
-    };
+    }
 
     /** Escribe CurrentEra en config/mictlan/mictlan.json. */
     public class helperEscribirDatosDeConfiguracion {
