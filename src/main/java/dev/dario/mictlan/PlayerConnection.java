@@ -1,5 +1,6 @@
 package dev.dario.mictlan;
 
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -12,8 +13,8 @@ public class PlayerConnection {
     public static Path playerFilePath;
     public static PlayerData playerDataJsonReturn;
     public static String playerDataJson = "";
-    public static void playerConnection(){
-        playerHandler = MictlanMod.serverHandler.getPlayer();
+    public static void playerConnection(ServerPlayNetworkHandler handler){
+        playerHandler = handler.getPlayer();
         String playerName = playerHandler.getGameProfile().getName();
         playerUUID = playerHandler.getGameProfile().getId().toString();
 
@@ -27,11 +28,11 @@ public class PlayerConnection {
             playerHandler.sendMessage(welcomeMessage, false);
             playerDataJsonReturn = playerData;
             playerDataJsonReturn.hasPlayedBefore(true);
-            MictlanMod.helperEntregaKitInicial.entregaKitInicial(playerHandler);
-            MictlanMod.helperEscribirDatosDelJugador.escribirDatosDelJugador();
+            Helpers.entregaKitInicial(playerHandler);
+            Helpers.escribirDatosDelJugador();
         } else {
             // Jugador existente.
-            MictlanMod.helperLeerDatosDelJugador.leerDatosDelJugador(playerHandler);
+            Helpers.leerDatosDelJugador(playerHandler);
             playerDataJsonReturn =MictlanMod.gson.fromJson(playerDataJson, playerData.getClass());
             Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
             playerHandler.sendMessage(welcomeBackMessage, false);
@@ -40,12 +41,12 @@ public class PlayerConnection {
             playerDataJsonReturn.setEra(MictlanMod.eraActual);
             // Reintento del kit (p. ej. inventario lleno la vez anterior).
             if(!hasReceivedStarterKit) {
-                MictlanMod.helperEntregaKitInicial.entregaKitInicial(playerHandler);
+                Helpers.entregaKitInicial(playerHandler);
             }
-            MictlanMod.helperEscribirDatosDelJugador.escribirDatosDelJugador();
+            Helpers.escribirDatosDelJugador();
         };
         if (!Files.exists(WorldLoad.mictlanConfigFile)) {
-            MictlanMod.helperEscribirDatosDeConfiguracion.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
+            Helpers.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
         }
         Text eraMessage = Text.literal("Te encuentras en la era " + MictlanMod.eraActual);
         playerHandler.sendMessage(eraMessage, false);

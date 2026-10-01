@@ -10,8 +10,6 @@ import java.nio.file.Path;
 import net.minecraft.server.MinecraftServer;
 import java.nio.file.Files;
 
-import dev.dario.mictlan.MictlanMod.helperPegadoDeChunksEnConfig;
-import dev.dario.mictlan.MictlanMod.helperPegadoDeEntidadesEnNuevoMundo;
 
 public class WorldLoad {
     public static Path mictlanConfigDir;
@@ -67,9 +65,9 @@ public class WorldLoad {
                     MictlanMod.LOGGER.error("[Mictlan] Archivo de configuracion no pudo ser leido", e);
                 }
                 respuestaArchivoDeConfiguracion = MictlanMod.gson.fromJson(readMictlanConfigFile, CurrentEra.getClass());
-                helperPegadoDeChunksEnConfig.pegadoDeChunksEnConfig(mundo, respuestaArchivoDeConfiguracion, mictlanCoreDataPath, CurrentEra, mictlanConfigFile);
+                Helpers.pegadoDeChunksEnConfig(mundo, respuestaArchivoDeConfiguracion, mictlanCoreDataPath, CurrentEra, mictlanConfigFile);
                 // Primero el terreno, despues las entidades encima.
-                helperPegadoDeEntidadesEnNuevoMundo.pegadoDeEntidadesEnNuevoMundo(mundo, mictlanCoreEntitiesPath);
+                Helpers.pegadoDeEntidadesEnNuevoMundo(mundo, mictlanCoreEntitiesPath);
         }
     }
 }
