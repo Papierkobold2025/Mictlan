@@ -31,6 +31,8 @@ public class MictlanMod implements ModInitializer {
 
     public static final Gson gson = new Gson();
 
+    public static int commandExecuted = 0;
+
     /**
      * -------------------------------------------------------------------------
      * DATOS DE LA ERA
@@ -114,7 +116,7 @@ public class MictlanMod implements ModInitializer {
 
                 .then(CommandManager.literal("home")
                     .executes(context ->{
-                        if(HelpersComandos.commandExecuted % 2 != 0) {
+                        if(commandExecuted % 2 != 0) {
                             HelpersComandos.primeraEsquina(context);
                         } else {
                             HelpersComandos.segundaEsquina();

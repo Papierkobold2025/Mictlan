@@ -33,7 +33,6 @@ public class HelpersComandos {
     private static NbtCompound archivoEntidades;
     private static Box caja;
     private static ServerPlayerEntity player;
-    public static int commandExecuted = 0;
     public static ChunkPos chunk;
     public static ChunkPos firstChunk;
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
@@ -55,7 +54,7 @@ public class HelpersComandos {
     public static void primeraEsquina(CommandContext<ServerCommandSource> context) {
         player = context.getSource().getPlayer();
         chunk = player.getChunkPos();
-        commandExecuted++;
+        MictlanMod.commandExecuted++;
         homeChunksX.clear();
         homeChunksZ.clear();
         totalChunkPosCount.clear();
@@ -171,7 +170,7 @@ public class HelpersComandos {
         homeChunksZ.clear();
         totalChunkPosCount.clear();
         // El siguiente /mictlan home vuelve a ser la primera esquina.
-        commandExecuted = 0;
+        MictlanMod.commandExecuted = 0;
         try {
             Files.delete(Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json"));
         } catch (Exception e) {
