@@ -66,7 +66,9 @@ public class HelpersComandos {
     * -------------------------------------------------------------------------
     */
 
-    public static void segundaEsquina() {
+    public static void segundaEsquina(CommandContext<ServerCommandSource> context) {
+        player = context.getSource().getPlayer();
+        chunk = player.getChunkPos();
         secondChunk = chunk;
         worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
         MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);

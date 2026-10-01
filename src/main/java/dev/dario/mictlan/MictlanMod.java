@@ -120,7 +120,7 @@ public class MictlanMod implements ModInitializer {
                         if(commandExecuted % 2 != 0) {
                             HelpersComandos.primeraEsquina(context);
                         } else {
-                            HelpersComandos.segundaEsquina();
+                            HelpersComandos.segundaEsquina(context);
                             LOGGER.info("[Mictlan] " + HelpersComandos.totalChunkPosCount);
                             context.getSource().sendFeedback(() -> Text.literal("Tu casa se ha guardado exitosamente"), false);
                             for(ChunkPos chunks : HelpersComandos.totalChunkPosCount){
