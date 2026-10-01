@@ -140,8 +140,8 @@ public class Helpers {
             ItemStack welcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
             Identifier welcomeBookIdentifier = new Identifier("patchouli","guide_book");
             ItemStack welcomeBook =new ItemStack(Registries.ITEM.get(welcomeBookIdentifier));
+            welcomeBook.getOrCreateNbt().putString("patchouli:book", "mictlan:codice");
             if(PlayerConnection.playerHandler.getInventory().insertStack(welcomeItem) && PlayerConnection.playerHandler.getInventory().insertStack(welcomeBook)) {
-                welcomeBook.getOrCreateNbt().putString("patchouli:book", "mictlan:codice");
                 PlayerConnection.playerDataJsonReturn.hasReceivedStarterKit(true);
             }
         } catch (Exception e) {
