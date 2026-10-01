@@ -3,6 +3,7 @@ package dev.dario.mictlan;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.nio.file.Files;
 import net.minecraft.text.Text;
 
@@ -13,9 +14,11 @@ public class PlayerConnection {
     public static Path playerFilePath;
     public static PlayerData playerDataJsonReturn;
     public static String playerDataJson = "";
+    public static ArrayList<ServerPlayerEntity> jugadoresDisponibles = new ArrayList<>();
     public static void playerConnection(ServerPlayNetworkHandler handler){
         playerHandler = handler.getPlayer();
         String playerName = playerHandler.getGameProfile().getName();
+        jugadoresDisponibles.add(playerHandler);
         playerUUID = playerHandler.getGameProfile().getId().toString();
 
         playerData = new PlayerData(playerUUID);
