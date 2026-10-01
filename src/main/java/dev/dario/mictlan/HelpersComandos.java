@@ -54,7 +54,6 @@ public class HelpersComandos {
     public static void primeraEsquina(CommandContext<ServerCommandSource> context) {
         player = context.getSource().getPlayer();
         chunk = player.getChunkPos();
-        MictlanMod.commandExecuted++;
         homeChunksX.clear();
         homeChunksZ.clear();
         totalChunkPosCount.clear();

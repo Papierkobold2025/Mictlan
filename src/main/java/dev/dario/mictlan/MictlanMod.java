@@ -116,6 +116,7 @@ public class MictlanMod implements ModInitializer {
 
                 .then(CommandManager.literal("home")
                     .executes(context ->{
+                        commandExecuted++;
                         if(commandExecuted % 2 != 0) {
                             HelpersComandos.primeraEsquina(context);
                         } else {
