@@ -1,0 +1,1 @@
+advancement grant @s only mictlan:codice/rumor/bosque_cerezos

@@ -1,0 +1,18 @@
+{
+    "name": "El bosque de los cerezos",
+    "icon": "minecraft:cherry_sapling",
+    "category": "mictlan:tierras",
+    "advancement": "mictlan:codice/rumor/bosque_cerezos",
+    "secret": true,
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "text": "Dicen que hay un bosque donde los árboles nunca dejan de florecer."
+        },
+        {
+            "type": "pathcouli:quest",
+            "trigger": "mictlan:codice/visitado/bosque_cerezos",
+            "text": "Encuentra el bosque."
+        }
+    ]
+}

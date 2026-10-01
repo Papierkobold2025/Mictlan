@@ -16,6 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.Optional;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.Identifier;
+import net.minecraft.registry.Registries;
+
 
 public class Helpers {
 
@@ -134,8 +137,10 @@ public class Helpers {
 
     public static void entregaKitInicial(ServerPlayerEntity jugador) {
         try{
-            ItemStack WelcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
-            if(PlayerConnection.playerHandler.getInventory().insertStack(WelcomeItem)) {
+            ItemStack welcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
+            Identifier welcomeBookIdentifier = new Identifier("patchouli","guide_book");
+            ItemStack welcomeBook =new ItemStack(Registries.ITEM.get(welcomeBookIdentifier));
+            if(PlayerConnection.playerHandler.getInventory().insertStack(welcomeItem) && PlayerConnection.playerHandler.getInventory().insertStack(welcomeBook)) {
                 PlayerConnection.playerDataJsonReturn.hasReceivedStarterKit(true);
             }
         } catch (Exception e) {

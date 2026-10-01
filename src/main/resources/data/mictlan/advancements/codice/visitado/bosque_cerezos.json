@@ -1,0 +1,17 @@
+{
+    "criteria":{
+        "llego": {
+            "trigger": "minecraft:location",
+            "conditions": {
+                "player": {
+                    "location": {
+                        "biome": "minecraft:cherry_grove"
+                    }
+                }
+            }
+        }
+    },
+    "rewards": {
+        "function": "mictlan:codice/visitado/bosque_cerezos"
+    }
+}
