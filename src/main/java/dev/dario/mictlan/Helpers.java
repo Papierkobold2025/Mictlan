@@ -141,6 +141,7 @@ public class Helpers {
             Identifier welcomeBookIdentifier = new Identifier("patchouli","guide_book");
             ItemStack welcomeBook =new ItemStack(Registries.ITEM.get(welcomeBookIdentifier));
             if(PlayerConnection.playerHandler.getInventory().insertStack(welcomeItem) && PlayerConnection.playerHandler.getInventory().insertStack(welcomeBook)) {
+                welcomeBook.getOrCreateNbt().putString("patchouli:book", "mictlan:codice");
                 PlayerConnection.playerDataJsonReturn.hasReceivedStarterKit(true);
             }
         } catch (Exception e) {

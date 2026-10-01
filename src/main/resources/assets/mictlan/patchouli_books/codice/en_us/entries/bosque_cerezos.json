@@ -10,7 +10,7 @@
             "text": "Dicen que hay un bosque donde los árboles nunca dejan de florecer."
         },
         {
-            "type": "pathcouli:quest",
+            "type": "patchouli:quest",
             "trigger": "mictlan:codice/visitado/bosque_cerezos",
             "text": "Encuentra el bosque."
         }
