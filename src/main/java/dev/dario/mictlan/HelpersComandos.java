@@ -21,10 +21,6 @@ import java.util.ArrayList;
 import java.nio.file.Path;
 
 public class HelpersComandos {
-    private static int commandExecuted = 0;
-    private static ArrayList<Integer> homeChunksX;
-    private static ArrayList<Integer> homeChunksZ;
-    private static ChunkPos firstChunk;
     private static ChunkPos secondChunk;
     private static Path worldDataChunks;
     private static String worldChunkData = "";
@@ -35,114 +31,151 @@ public class HelpersComandos {
     private static List<Entity> entidadesDelChunk;
     private static NbtCompound entidadesAGuardar;
     private static NbtCompound archivoEntidades;
-    public static ArrayList<ChunkPos> totalChunkPosCount;
     private static Box caja;
-
+    private static ServerPlayerEntity player;
+    public static int commandExecuted = 0;
+    public static ChunkPos chunk;
+    public static ChunkPos firstChunk;
+    public static ArrayList<Integer> homeChunksX = new ArrayList<>();
+    public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
+    public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
+    
     /**
     * -------------------------------------------------------------------------
     * EXTRACTO DE COMANDO PARA GUARDAR CHUNKS DE CASA EN RAM (ENTIDADES/BLOQUES)
     * -------------------------------------------------------------------------
     */
 
-    public static void guardadoDeCasa(CommandContext<ServerCommandSource> context) {
-        ServerPlayerEntity player = context.getSource().getPlayer();
-        ChunkPos chunk = player.getChunkPos();
+    /**
+    * -------------------------------------------------------------------------
+    * PRIMERA ESQUINA PARA EXTRACTO DE CHUNKS (BLOQUES/ENTIDADES)
+    * -------------------------------------------------------------------------
+    */
+
+    public static void primeraEsquina(CommandContext<ServerCommandSource> context) {
+        player = context.getSource().getPlayer();
+        chunk = player.getChunkPos();
         commandExecuted++;
-        if(commandExecuted % 2 != 0) {
-            // Primera esquina: reinicia las listas en memoria.
-            homeChunksX.clear();
-            homeChunksZ.clear();
-            totalChunkPosCount.clear();
-            firstChunk = chunk;
-        } else {
-            // Segunda esquina.
-            secondChunk = chunk;
-            worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
-            MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);
-            if(!Files.exists(worldDataChunks)) {
-                try {
-                    Files.writeString(worldDataChunks, MictlanMod.gson.toJson(MictlanMod.CurrentEra));
-                } catch (IOException e) {
-                    MictlanMod.LOGGER.error("[Mictlan] Datos de los Chunks no pusieron ser escritos!");
-                }
-            }
-            // Se relee de disco para usar lo que realmente quedo guardado.
-            try {
-                worldChunkData = Files.readString(worldDataChunks);
-            } catch (Exception e) {
-                MictlanMod.LOGGER.error("[Mictlan] Datos de los chunks no pueden ser leidos");
-            }
-            worldChunkDataReturn = MictlanMod.gson.fromJson(worldChunkData, MictlanMod.CurrentEra.getClass());
-            ChunkPos homeStartPos = worldChunkDataReturn.getHomeStart();
-            ChunkPos homeFinishPos = worldChunkDataReturn.getHomeFinish();
-
-            // --- Paso 1: rango X (min/max por si las esquinas vienen en cualquier orden) ---
-            int lowChunkCount = Math.min(homeStartPos.x, homeFinishPos.x);
-            int highChunkCount = Math.max(homeStartPos.x, homeFinishPos.x);
-            for(int chunksStart = lowChunkCount; chunksStart <= highChunkCount; chunksStart++) {
-                homeChunksX.add(chunksStart);
-            }
-
-            // --- Paso 2: rango Z ---
-            lowChunkCount = Math.min(homeStartPos.z, homeFinishPos.z);
-            highChunkCount = Math.max(homeStartPos.z, homeFinishPos.z);
-            for(int chunksFinish = lowChunkCount; chunksFinish <= highChunkCount; chunksFinish++) {
-                homeChunksZ.add(chunksFinish);
-            }
-
-            // --- Paso 3: producto X * Z ---
-            for( int chunkCounterX = 0; chunkCounterX < homeChunksX.size(); chunkCounterX++) {
-                for(int chunkCounterZ = 0; chunkCounterZ < homeChunksZ.size(); chunkCounterZ++) {
-                    ChunkPos chunkAggregation = new ChunkPos (homeChunksX.get(chunkCounterX), homeChunksZ.get(chunkCounterZ));
-                    totalChunkPosCount.add(chunkAggregation);
-                }
-            }
-        }
-    };
-
-    public static void guardarCasaEnDisco(CommandContext<ServerCommandSource> context) {
-        for(ChunkPos chunks : totalChunkPosCount) {
-            mictlanCoreDataFile = Path.of(WorldLoad.mictlanCoreDataPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
-            mundoParaTransportar = context.getSource().getWorld();
-            // Vacio si el chunk nunca se ha guardado en disco.
-            Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
-            if(datosChunk.isPresent()) {
-                MictlanMod.LOGGER.info("[Mictlan] " + datosChunk.get().getKeys());
-                try{
-                    NbtIo.writeCompressed(datosChunk.get(), mictlanCoreDataFile.toFile());
-                } catch(IOException e) {
-                    MictlanMod.LOGGER.error("[Mictlan] Datos de Chunk no pudieron ser guardados en disco!");
-                }
-            }
-        }
-        // Marca pegado pendiente para el proximo mundo que se cargue.
-        MictlanMod.CurrentEra.homeChunkPasted(true);
-        Helpers.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
+        homeChunksX.clear();
+        homeChunksZ.clear();
+        totalChunkPosCount.clear();
+        firstChunk = chunk;
     }
-    public static void guardarEntidadesEnDisco() {
-        for (ChunkPos chunks : totalChunkPosCount) {
-            mictlanCoreEntitiesFile = Path.of(WorldLoad.mictlanCoreEntitiesPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
-            // Entidades: se buscan por volumen (+1 porque getEnd es inclusivo).
-            caja = new Box(chunks.getStartX(), mundoParaTransportar.getBottomY(), chunks.getStartZ(), chunks.getEndX() + 1, mundoParaTransportar.getTopY(), chunks.getEndZ() +1);
-            entidadesDelChunk = mundoParaTransportar.getOtherEntities(null, caja);
-            NbtList listaEntidades = new NbtList();
-            for (Entity entity : entidadesDelChunk) {
-                entidadesAGuardar = new NbtCompound();
-                // false para jugadores, pasajeros y entidades removidas.
-                if (entity.saveSelfNbt(entidadesAGuardar)) {
-                    listaEntidades.add(entidadesAGuardar);
-                }
-            }
-            archivoEntidades = new NbtCompound();
-            archivoEntidades.put("entidades", listaEntidades);
+
+    /**
+    * -------------------------------------------------------------------------
+    * SEGUNDA ESQUINA PARA EXTRACTO DE CHUNKS (BLOQUES/ENTIDADES)
+    * -------------------------------------------------------------------------
+    */
+
+    public static void segundaEsquina() {
+        secondChunk = chunk;
+        worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
+        MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);
+        if(!Files.exists(worldDataChunks)) {
             try {
-                NbtIo.writeCompressed(archivoEntidades, mictlanCoreEntitiesFile.toFile());
-            } catch (Exception e) {
-                MictlanMod.LOGGER.error("Entidades del Chunk " + chunks.x + " " + chunks.z + " no se pudieron guardar.", e);
+                Files.writeString(worldDataChunks, MictlanMod.gson.toJson(MictlanMod.CurrentEra));
+            } catch (IOException e) {
+                MictlanMod.LOGGER.error("[Mictlan] Datos de los Chunks no pusieron ser escritos!");
+            }
+        }
+        // Se relee de disco para usar lo que realmente quedo guardado.
+        try {
+            worldChunkData = Files.readString(worldDataChunks);
+        } catch (Exception e) {
+            MictlanMod.LOGGER.error("[Mictlan] Datos de los chunks no pueden ser leidos");
+        }
+        worldChunkDataReturn = MictlanMod.gson.fromJson(worldChunkData, MictlanMod.CurrentEra.getClass());
+        ChunkPos homeStartPos = worldChunkDataReturn.getHomeStart();
+        ChunkPos homeFinishPos = worldChunkDataReturn.getHomeFinish();
+
+        // --- Paso 1: rango X (min/max por si las esquinas vienen en cualquier orden) ---
+        int lowChunkCount = Math.min(homeStartPos.x, homeFinishPos.x);
+        int highChunkCount = Math.max(homeStartPos.x, homeFinishPos.x);
+        for(int chunksStart = lowChunkCount; chunksStart <= highChunkCount; chunksStart++) {
+            homeChunksX.add(chunksStart);
+        }
+
+        // --- Paso 2: rango Z ---
+        lowChunkCount = Math.min(homeStartPos.z, homeFinishPos.z);
+        highChunkCount = Math.max(homeStartPos.z, homeFinishPos.z);
+        for(int chunksFinish = lowChunkCount; chunksFinish <= highChunkCount; chunksFinish++) {
+            homeChunksZ.add(chunksFinish);
+        }
+
+        // --- Paso 3: producto X * Z ---
+        for( int chunkCounterX = 0; chunkCounterX < homeChunksX.size(); chunkCounterX++) {
+            for(int chunkCounterZ = 0; chunkCounterZ < homeChunksZ.size(); chunkCounterZ++) {
+                ChunkPos chunkAggregation = new ChunkPos (homeChunksX.get(chunkCounterX), homeChunksZ.get(chunkCounterZ));
+                totalChunkPosCount.add(chunkAggregation);
             }
         }
     }
-    public static void comandoEra() {
 
-    }    
+    /**
+    * -------------------------------------------------------------------------
+    * GUARDAR LOS CHUNKS CARGADOS EN RAM EN DISCO
+    * -------------------------------------------------------------------------
+    */
+
+    public static void guardarCasaEnDisco(CommandContext<ServerCommandSource> context, ChunkPos chunks) {
+        mictlanCoreDataFile = Path.of(WorldLoad.mictlanCoreDataPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
+        mundoParaTransportar = context.getSource().getWorld();
+        // Vacio si el chunk nunca se ha guardado en disco.
+        Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
+        if(datosChunk.isPresent()) {
+            MictlanMod.LOGGER.info("[Mictlan] " + datosChunk.get().getKeys());
+            try{
+                NbtIo.writeCompressed(datosChunk.get(), mictlanCoreDataFile.toFile());
+            } catch(IOException e) {
+                MictlanMod.LOGGER.error("[Mictlan] Datos de Chunk no pudieron ser guardados en disco!");
+            }
+        }
+    }
+
+    /**
+    * -------------------------------------------------------------------------
+    * GUARDAR LAS ENTIDADES CARGADAS EN RAM EN DISCO
+    * -------------------------------------------------------------------------
+    */
+
+    public static void guardarEntidadesEnDisco(ChunkPos chunks) {
+        mictlanCoreEntitiesFile = Path.of(WorldLoad.mictlanCoreEntitiesPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
+        // Entidades: se buscan por volumen (+1 porque getEnd es inclusivo).
+        caja = new Box(chunks.getStartX(), mundoParaTransportar.getBottomY(), chunks.getStartZ(), chunks.getEndX() + 1, mundoParaTransportar.getTopY(), chunks.getEndZ() +1);
+        entidadesDelChunk = mundoParaTransportar.getOtherEntities(null, caja);
+        NbtList listaEntidades = new NbtList();
+        for (Entity entity : entidadesDelChunk) {
+            entidadesAGuardar = new NbtCompound();
+            // false para jugadores, pasajeros y entidades removidas.
+            if (entity.saveSelfNbt(entidadesAGuardar)) {
+                listaEntidades.add(entidadesAGuardar);
+            }
+        }
+        archivoEntidades = new NbtCompound();
+        archivoEntidades.put("entidades", listaEntidades);
+        try {
+            NbtIo.writeCompressed(archivoEntidades, mictlanCoreEntitiesFile.toFile());
+        } catch (Exception e) {
+            MictlanMod.LOGGER.error("Entidades del Chunk " + chunks.x + " " + chunks.z + " no se pudieron guardar.", e);
+        }
+    }
+
+    /**
+    * -------------------------------------------------------------------------
+    * SEGUNDA ESQUINA PARA EXTRACTO DE CHUNKS (BLOQUES/ENTIDADES)
+    * -------------------------------------------------------------------------
+    */
+
+    public static void borrarDatosCargados() {
+        homeChunksZ.clear();
+        totalChunkPosCount.clear();
+        // El siguiente /mictlan home vuelve a ser la primera esquina.
+        commandExecuted = 0;
+        try {
+            Files.delete(Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json"));
+        } catch (Exception e) {
+            MictlanMod.LOGGER.error("[Mictlan] Datos de los chunks no pueden ser borrados");
+        }
+    }
 }
