@@ -47,6 +47,10 @@ public class PlayerData {
         return this.hasReceivedStarterKit;
     }
 
+    public String isEra() {
+        return this.era;
+    }
+
     /** Devuelve el UUID del jugador */
     public String getPlayerUUID() {
         return this.playerUUID;

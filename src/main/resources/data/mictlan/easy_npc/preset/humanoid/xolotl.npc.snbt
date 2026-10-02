@@ -1,0 +1,26 @@
+{
+    PresetMetadata:{
+        name:"Xolotl",
+        author:"Dario",
+        category:"Mictlan",
+        version:"1.0.0",
+        access:"RESTRICTED",
+        entityTypeId:"easy_npc:humanoid",
+        variantType:"NOOR"
+    },
+    data:{
+        id:"easy_npc:humanoid",
+        EasyNPCVersion:3,
+        CustomName:'{"text":"Xolotl"}',
+        VariantType:"NOOR",
+        CustomIdentifier:"mictlan:xolotl",
+        Tags:["Xolotl"],
+        ActionData:{
+            ActionEventSet:{
+                ON_INTERACTION:[{
+                    Cmd:"mictlan:xolotl hablar",Type:"CUSTOM"
+                }]
+            }
+        }
+    }
+}

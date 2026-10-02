@@ -4,8 +4,16 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Optional;
+
+import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
+import de.markusbordihn.easynpc.data.state.StateEntry;
+import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+
 import java.nio.file.Files;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 
 public class PlayerConnection {
     public static ServerPlayerEntity playerHandler;
@@ -13,6 +21,8 @@ public class PlayerConnection {
     public static PlayerData playerData;
     public static Path playerFilePath;
     public static PlayerData playerDataJsonReturn;
+    private static Optional<EasyNPC<?>> posicionXolotl;
+    private static StateEntry xolotl;
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayerEntity> jugadoresDisponibles = new ArrayList<>();
     public static void playerConnection(ServerPlayNetworkHandler handler){
@@ -24,7 +34,10 @@ public class PlayerConnection {
         playerData = new PlayerData(playerUUID);
 
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
-
+        if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier("mictlan", "xolotl")).isEmpty()) {
+            MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
+            posicionXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier("mictlan", "easy_npc/preset/humanoid/xolotl.npc.snbt"), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
+        }
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
             Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");

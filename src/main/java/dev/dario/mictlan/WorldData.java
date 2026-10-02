@@ -22,6 +22,8 @@ public class WorldData {
     /** true = hay chunks copiados esperando pegarse en el proximo mundo. */
     private boolean homeChunksPasted;
 
+    private boolean haRecibidoSaludoInicial;
+
     /** Crea los datos de una era nueva, todavia sin zona "home". */
     public WorldData(String era) {
         this.era = era;
@@ -36,6 +38,10 @@ public class WorldData {
     /** Activa / limpia la bandera de pegado pendiente. */
     public void homeChunkPasted(boolean homeChunkPasted) {
         this.homeChunksPasted = homeChunkPasted;
+    }
+
+    public void haRecibidoSaludoInicial(boolean haRecibidoSaludoInicial) {
+        this.haRecibidoSaludoInicial = haRecibidoSaludoInicial;
     }
 
     /** Devuelve la primera esquina de la zona "home". */
@@ -56,5 +62,9 @@ public class WorldData {
     /** Devuelve el nombre de la era. */
     public String getEra() {
         return this.era;
+    }
+
+    public boolean isHaRecibidoSaludoInicial() {
+        return this.haRecibidoSaludoInicial;
     }
 }

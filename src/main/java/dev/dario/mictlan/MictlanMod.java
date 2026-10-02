@@ -9,8 +9,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.util.Identifier;
 
 import com.google.gson.Gson;
+
+import de.markusbordihn.easynpc.api.action.ActionRegistry;
 
 /**
  * Punto de entrada del mod. Registra eventos de mundo, conexion de
@@ -74,6 +77,16 @@ public class MictlanMod implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             PlayerConnection.playerConnection(handler);
+        });
+
+        /**
+         * -------------------------------------------------------------------------
+         * PRIMERA INTERACCION CON NPC
+         * -------------------------------------------------------------------------
+         */
+
+        ActionRegistry.register(new Identifier("mictlan", "xolotl"), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{
+            ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
         });
 
         /**
