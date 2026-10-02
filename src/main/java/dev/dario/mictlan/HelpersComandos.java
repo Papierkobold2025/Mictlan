@@ -18,12 +18,17 @@ import java.nio.file.Files;
 import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
+import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
+import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.nio.file.Path;
 
 public class HelpersComandos {
@@ -119,6 +124,9 @@ public class HelpersComandos {
     */
 
     public static void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context) {
+        Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier( new Identifier("mictlan", "xolotl"));
+        xolotlNPC
+        ConfiguracionNPC.obtenerNPC()
         BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
         EasyNPCActionHandler.setState(
             PlayerConnection.spawnXolotl.get(), 
