@@ -37,7 +37,7 @@ public class ConfiguracionNPC {
                 PlayerConnection.jugadoresDisponibles.get(i).getAdvancementTracker().grantCriterion(cherryGroveAdvancement, "otorgado");
             }
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
-            EasyNPCActionHandler.setState(npc, new Identifier("mictlan", "saludo_inicial"), new StateEntry, jugador);
+            EasyNPCActionHandler.setState(npc, new Identifier("mictlan", "saludo_inicial"), StateEntry.of(true), jugador);
         }
     }
 
