@@ -10,17 +10,13 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 import java.nio.file.Files;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
-import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
-import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -48,7 +44,6 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
-    private static Optional<EasyNPC<?>> npcXolotl;
     
     /**
     * -------------------------------------------------------------------------
@@ -129,15 +124,14 @@ public class HelpersComandos {
      * -------------------------------------------------------------------------
     */
 
-    public static void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, ServerPlayNetworkHandler handler, EasyNPC<?> npc, ServerPlayerEntity jugador) {
-        BlockPos nuevaPosition = handler.getPlayer().getBlockPos();
-        npcXolotl = EasyNPCActionHandler.setState(
+    public static void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context) {
+        BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
+        EasyNPCActionHandler.setState(
             PlayerConnection.spawnXolotl.get(), 
             new Identifier("mictlan", "casa_xolotl_x"),
             StateEntry.of(nuevaPosition.getX()),
-            jugador
-        ) 
-        EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
+            context.getSource().getPlayer()
+        );
         EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
     } 
 
