@@ -35,7 +35,6 @@ public class PlayerConnection {
         if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier("mictlan", "xolotl")).isEmpty()) {
             MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
             posicionXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier("mictlan", "easy_npc/preset/humanoid/xolotl.npc.snbt"), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
-            ConfiguracionNPC.interaccionXolotl(posicionXolotl.get(), playerHandler);;
         }
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
