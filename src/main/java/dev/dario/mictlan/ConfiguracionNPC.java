@@ -1,6 +1,9 @@
 package dev.dario.mictlan;
 
+import java.util.Optional;
+
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
+import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.data.action.ActionDataEntry;
 import de.markusbordihn.easynpc.data.action.ActionDataType;
 import de.markusbordihn.easynpc.data.state.StateEntry;
@@ -16,6 +19,7 @@ public class ConfiguracionNPC {
     public static PlayerData jugadorInteractuando;
     public static StateEntry saludoInicial;
     private static String saludoAJugadores = "";
+    private Optional<EasyNPCEntityHandler> getNPC;
     private static void jugadoresSaludados() {
         int i = 0;
         while (i < cantidadJugadores) {
@@ -47,7 +51,7 @@ public class ConfiguracionNPC {
         }
     }
 
-    public static void bienvenidaAJugadores(PlayerEntity jugador) {
-
+    public void obtenerNPC(Optional<EasyNPCEntityHandler> npc) {
+        this.getNPC = npc;
     }
 }
