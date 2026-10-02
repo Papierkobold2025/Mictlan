@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.List;
@@ -21,7 +22,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import de.markusbordihn.easynpc.data.state.StateEntry;
-
 import java.util.Optional;
 import java.util.ArrayList;
 import java.nio.file.Path;
@@ -44,12 +44,6 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
-    
-    /**
-    * -------------------------------------------------------------------------
-    * EXTRACTO DE COMANDO PARA GUARDAR CHUNKS DE CASA EN RAM (ENTIDADES/BLOQUES)
-    * -------------------------------------------------------------------------
-    */
 
     /**
     * -------------------------------------------------------------------------
@@ -133,6 +127,7 @@ public class HelpersComandos {
             context.getSource().getPlayer()
         );
         EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
+        context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
     /**
