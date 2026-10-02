@@ -123,6 +123,19 @@ public class MictlanMod implements ModInitializer {
 
                 /**
                 * -----------------------------------------------------------------
+                * /mictlan home set
+                * -----------------------------------------------------------------
+                */                
+
+                .then(CommandManager.literal("home")
+                    .then(CommandManager.literal("set")
+                        .executes(context -> {
+                            HelpersComandos.marcarNuevaUbicacionNPC(context, handler, );
+                            return 1;
+                        })))
+
+                /**
+                * -----------------------------------------------------------------
                 * /mictlan home
                 * -----------------------------------------------------------------
                 */

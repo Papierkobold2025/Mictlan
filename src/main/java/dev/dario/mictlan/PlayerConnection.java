@@ -20,7 +20,7 @@ public class PlayerConnection {
     public static PlayerData playerData;
     public static Path playerFilePath;
     public static PlayerData playerDataJsonReturn;
-    private static Optional<EasyNPC<?>> posicionXolotl;
+    public static Optional<EasyNPC<?>> spawnXolotl;
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayerEntity> jugadoresDisponibles = new ArrayList<>();
     public static void playerConnection(ServerPlayNetworkHandler handler){
@@ -34,7 +34,7 @@ public class PlayerConnection {
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
         if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier("mictlan", "xolotl")).isEmpty()) {
             MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
-            posicionXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier("mictlan", "easy_npc/preset/humanoid/xolotl.npc.snbt"), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
+            spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier("mictlan", "easy_npc/preset/humanoid/xolotl.npc.snbt"), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
         }
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
