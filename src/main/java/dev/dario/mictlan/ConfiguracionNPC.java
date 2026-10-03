@@ -1,15 +1,21 @@
 package dev.dario.mictlan;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
+
+import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
 import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.data.action.ActionDataEntry;
 import de.markusbordihn.easynpc.data.action.ActionDataType;
+import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -19,7 +25,9 @@ public class ConfiguracionNPC {
     public static PlayerData jugadorInteractuando;
     public static StateEntry saludoInicial;
     private static String saludoAJugadores = "";
-    private Identifier getNPC;
+    private Optional<EasyNPC<?>> getNPC;
+    private UUID uuidNPC;
+    public static ConfiguracionNPC configuracionNPC;
     private static void jugadoresSaludados() {
         int i = 0;
         while (i < cantidadJugadores) {
@@ -51,7 +59,16 @@ public class ConfiguracionNPC {
         }
     }
 
-    public void obtenerNPC(Identifier npc) {
+    public ConfiguracionNPC(Optional<EasyNPC<?>> npc) {
         this.getNPC = npc;
+    }
+
+    public void obtenerNPC(CommandContext<ServerCommandSource> context) {
+        Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier( new Identifier("mictlan", "xolotl"));
+        for(SavedNPCEntityEntry datosNPC : xolotlNPC) {
+            uuidNPC = datosNPC.entityUUID();
+        }
+        Optional<EasyNPC<?>> savedNPCEntity =EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
+        configuracionNPC = new ConfiguracionNPC(savedNPCEntity);
     }
 }
