@@ -19,7 +19,7 @@ public class ConfiguracionNPC {
     public static PlayerData jugadorInteractuando;
     public static StateEntry saludoInicial;
     private static String saludoAJugadores = "";
-    private Optional<EasyNPCEntityHandler> getNPC;
+    private Identifier getNPC;
     private static void jugadoresSaludados() {
         int i = 0;
         while (i < cantidadJugadores) {
@@ -51,7 +51,7 @@ public class ConfiguracionNPC {
         }
     }
 
-    public void obtenerNPC(Optional<EasyNPCEntityHandler> npc) {
+    public void obtenerNPC(Identifier npc) {
         this.getNPC = npc;
     }
 }

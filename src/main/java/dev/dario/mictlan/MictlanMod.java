@@ -130,7 +130,8 @@ public class MictlanMod implements ModInitializer {
                 .then(CommandManager.literal("home")
                     .then(CommandManager.literal("set")
                         .executes(context -> {
-                            HelpersComandos.marcarNuevaUbicacionNPC(context);
+                            HelpersComandos nuevaUBicacionNPC = new HelpersComandos();
+                            nuevaUBicacionNPC.marcarNuevaUbicacionNPC(context);
                             return 1;
                         })))
 
