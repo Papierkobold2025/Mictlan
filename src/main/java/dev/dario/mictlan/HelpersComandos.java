@@ -126,6 +126,7 @@ public class HelpersComandos {
     */
 
     public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context) {
+        ConfiguracionNPC.configuracionNPC.obtenerNPC(context, new Identifier("mictlan", "xolotl"));
         Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier( new Identifier("mictlan", "xolotl"));
         for(SavedNPCEntityEntry datosNPC : xolotlNPC) {
             uuidNPC = datosNPC.entityUUID();
