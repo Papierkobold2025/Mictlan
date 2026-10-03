@@ -63,8 +63,9 @@ public class ConfiguracionNPC {
         this.getNPC = npc;
     }
 
-    public void obtenerNPC(CommandContext<ServerCommandSource> context) {
-        Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier( new Identifier("mictlan", "xolotl"));
+
+    public void obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
+        Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
         for(SavedNPCEntityEntry datosNPC : xolotlNPC) {
             uuidNPC = datosNPC.entityUUID();
         }
