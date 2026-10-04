@@ -26,6 +26,7 @@ public class ConfiguracionNPC {
     private static String saludoAJugadores = "";
     private Optional<EasyNPC<?>> getNPC;
     private UUID uuidNPC;
+    private boolean xolotlSeMudo;
     public static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
@@ -67,6 +68,9 @@ public class ConfiguracionNPC {
         this.getNPC = npc;
     }
 
+    public void xolotlYaSeMudo(boolean xolotlSeMudo) {
+        this.xolotlSeMudo = xolotlSeMudo;
+    }
 
     public void obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
         HelpersComandos nuevaPosicionNPC = new HelpersComandos();
@@ -79,5 +83,9 @@ public class ConfiguracionNPC {
         if(!getNPC.isEmpty()) {
             nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), getNPC);
         }
+    }
+
+    public Optional<EasyNPC<?>> npc() {
+        return this.getNPC;
     }
 }

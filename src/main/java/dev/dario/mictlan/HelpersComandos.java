@@ -11,6 +11,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 import java.nio.file.Files;
@@ -18,6 +19,7 @@ import java.nio.file.Files;
 import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
+import de.markusbordihn.easynpc.api.handler.EasyNPCMotionHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -44,9 +46,12 @@ public class HelpersComandos {
     private static ServerPlayerEntity player;
     public static ChunkPos chunk;
     public static ChunkPos firstChunk;
+    private static boolean npcFueMovido;
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
+    public static ConfiguracionNPC movimientoNPC;
+    public static ConfiguracionNPC movimientoNPCCompletado;
     public Optional<EasyNPC<?>> savedNPCEntity;
     public UUID uuidNPC;
 
@@ -131,7 +136,14 @@ public class HelpersComandos {
             StateEntry.of(nuevaPosition.getX()),
             context.getSource().getPlayer()
         );
-        EasyNPCActionHandler.moveTo(npc.get(), nuevaPosition);
+        npcFueMovido = EasyNPCMotionHandler.snapTo(npc.get(), Vec3d.ofBottomCenter(nuevaPosition));
+        movimientoNPC = new ConfiguracionNPC(npc);
+        movimientoNPCCompletado = movimientoNPC;
+        if(npcFueMovido) {
+            movimientoNPC.xolotlYaSeMudo(true);
+        } else {
+            MictlanMod.LOGGER.error(npc.toString() + " no ha podido moverse hacia la posicion nueva!");
+        }
         context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
