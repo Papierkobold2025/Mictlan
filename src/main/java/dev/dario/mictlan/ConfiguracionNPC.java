@@ -65,11 +65,14 @@ public class ConfiguracionNPC {
 
 
     public void obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
+        HelpersComandos nuevaPosicionNPC = new HelpersComandos();
         Collection<SavedNPCEntityEntry> entidadNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
         for(SavedNPCEntityEntry datosNPC : entidadNPC) {
             uuidNPC = datosNPC.entityUUID();
         }
         Optional<EasyNPC<?>> savedNPCEntity =EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
-        configuracionNPC = new ConfiguracionNPC(savedNPCEntity);
+        if(!savedNPCEntity.isEmpty()) {
+            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, npcAObtener);
+        }
     }
 }

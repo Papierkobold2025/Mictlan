@@ -50,6 +50,7 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
+    public Optional<EasyNPC<?>> savedNPCEntity;
     public UUID uuidNPC;
 
     /**
@@ -125,24 +126,16 @@ public class HelpersComandos {
      * -------------------------------------------------------------------------
     */
 
-    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context) {
-        ConfiguracionNPC.configuracionNPC.obtenerNPC(context, new Identifier("mictlan", "xolotl"));
-        Collection<SavedNPCEntityEntry> xolotlNPC = EasyNPCEntityHandler.getByCustomIdentifier( new Identifier("mictlan", "xolotl"));
-        for(SavedNPCEntityEntry datosNPC : xolotlNPC) {
-            uuidNPC = datosNPC.entityUUID();
-        }
-        Optional<EasyNPC<?>> savedNPCEntity =EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
-        if(!savedNPCEntity.isEmpty()) {
-            BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
-            EasyNPCActionHandler.setState(
-                PlayerConnection.spawnXolotl.get(), 
-                new Identifier("mictlan", "casa_xolotl_x"),
-                StateEntry.of(nuevaPosition.getX()),
-                context.getSource().getPlayer()
-            );
-            EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
-            context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
-        }
+    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier) {
+        BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
+        EasyNPCActionHandler.setState(
+            PlayerConnection.spawnXolotl.get(), 
+            new Identifier("mictlan", "casa_xolotl_x"),
+            StateEntry.of(nuevaPosition.getX()),
+            context.getSource().getPlayer()
+        );
+        EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
+        context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
     /**
