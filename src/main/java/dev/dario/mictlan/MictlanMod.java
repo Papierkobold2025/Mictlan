@@ -85,7 +85,7 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        ActionRegistry.register(new Identifier("mictlan", "xolotl"), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{
+        ActionRegistry.register(new Identifier(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{
             ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
         });
 
@@ -130,8 +130,7 @@ public class MictlanMod implements ModInitializer {
                 .then(CommandManager.literal("home")
                     .then(CommandManager.literal("set")
                         .executes(context -> {
-                            HelpersComandos nuevaUBicacionNPC = new HelpersComandos();
-                            nuevaUBicacionNPC.marcarNuevaUbicacionNPC(context);
+                            ConfiguracionNPC.configuracionNPC.obtenerNPC(context, new Identifier(ConfiguracionNPC.xolotlNPCIdentifier));
                             return 1;
                         })))
 

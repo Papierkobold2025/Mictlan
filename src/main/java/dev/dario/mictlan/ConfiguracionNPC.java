@@ -14,7 +14,6 @@ import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import net.minecraft.advancement.Advancement;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -28,6 +27,8 @@ public class ConfiguracionNPC {
     private Optional<EasyNPC<?>> getNPC;
     private UUID uuidNPC;
     public static ConfiguracionNPC configuracionNPC;
+    public static String xolotlNPCIdentifier = "mictlan:xolotl";
+    public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
     private static void jugadoresSaludados() {
         int i = 0;
         while (i < cantidadJugadores) {
@@ -72,7 +73,7 @@ public class ConfiguracionNPC {
         }
         Optional<EasyNPC<?>> savedNPCEntity =EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
         if(!savedNPCEntity.isEmpty()) {
-            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, npcAObtener);
+            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), savedNPCEntity);
         }
     }
 }

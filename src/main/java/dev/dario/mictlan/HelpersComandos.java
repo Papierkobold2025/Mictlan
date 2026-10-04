@@ -18,18 +18,15 @@ import java.nio.file.Files;
 import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
-import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.nio.file.Path;
 
 public class HelpersComandos {
@@ -126,15 +123,15 @@ public class HelpersComandos {
      * -------------------------------------------------------------------------
     */
 
-    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier) {
+    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier, Optional<EasyNPC<?>> npc) {
         BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
         EasyNPCActionHandler.setState(
             PlayerConnection.spawnXolotl.get(), 
-            new Identifier("mictlan", "casa_xolotl_x"),
+            identifier,
             StateEntry.of(nuevaPosition.getX()),
             context.getSource().getPlayer()
         );
-        EasyNPCActionHandler.moveTo(PlayerConnection.spawnXolotl.get(), nuevaPosition);
+        EasyNPCActionHandler.moveTo(npc.get(), nuevaPosition);
         context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
