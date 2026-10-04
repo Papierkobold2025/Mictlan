@@ -19,7 +19,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 public class ConfiguracionNPC {
-    public static Integer cantidadJugadores = PlayerConnection.jugadoresDisponibles.size();
+    private static Integer cantidadJugadores;
     public static PlayerData saludoInicial1;
     public static PlayerData jugadorInteractuando;
     public static StateEntry saludoInicial;
@@ -30,6 +30,7 @@ public class ConfiguracionNPC {
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
     private static void jugadoresSaludados() {
+        cantidadJugadores = PlayerConnection.jugadoresDisponibles.size();
         int i = 0;
         while (i < cantidadJugadores) {
             saludoAJugadores += PlayerConnection.jugadoresDisponibles.get(i).getName().getString() + " y ";
@@ -40,7 +41,8 @@ public class ConfiguracionNPC {
             saludoAJugadores = saludoAJugadores.substring(0, saludoAJugadores.length() - 3);
         }
     }
-    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {    
+    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {   
+        cantidadJugadores = PlayerConnection.jugadoresDisponibles.size(); 
         ActionDataEntry darLibro = new ActionDataEntry(ActionDataType.COMMAND, "/give @a patchouli:guide_book{\"patchouli:book\":\"mictlan:codice\"}"); 
         MictlanMod.LOGGER.info("[Mictlan] " + jugador.getName().getString() + " interactuo con Xolotl.");
         saludoInicial = EasyNPCActionHandler.getState(npc, new Identifier("mictlan", "saludo_inicial"));
@@ -54,6 +56,7 @@ public class ConfiguracionNPC {
             for(int i = 0; i < cantidadJugadores; i++) {
                 Advancement cherryGroveAdvancement = PlayerConnection.jugadoresDisponibles.get(i).getServer().getAdvancementLoader().get(new Identifier("mictlan", "codice/rumor/bosque_cerezos"));
                 PlayerConnection.jugadoresDisponibles.get(i).getAdvancementTracker().grantCriterion(cherryGroveAdvancement, "otorgado");
+                MictlanMod.LOGGER.info("Jugador " + PlayerConnection.jugadoresDisponibles.get(i).getDisplayName() + " recibió su logro.");
             }
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
             EasyNPCActionHandler.setState(npc, new Identifier("mictlan", "saludo_inicial"), StateEntry.of(true), jugador);
