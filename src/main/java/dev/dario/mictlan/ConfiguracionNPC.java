@@ -26,7 +26,7 @@ public class ConfiguracionNPC {
     private static String saludoAJugadores = "";
     private Optional<EasyNPC<?>> getNPC;
     private UUID uuidNPC;
-    public static ConfiguracionNPC configuracionNPC;
+    public static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
     private static void jugadoresSaludados() {
@@ -71,9 +71,10 @@ public class ConfiguracionNPC {
         for(SavedNPCEntityEntry datosNPC : entidadNPC) {
             uuidNPC = datosNPC.entityUUID();
         }
-        Optional<EasyNPC<?>> savedNPCEntity =EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
-        if(!savedNPCEntity.isEmpty()) {
-            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), savedNPCEntity);
+        getNPC = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
+        ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(getNPC);
+        if(!getNPC.isEmpty()) {
+            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), getNPC);
         }
     }
 }
