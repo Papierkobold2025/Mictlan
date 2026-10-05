@@ -88,4 +88,8 @@ public class ConfiguracionNPC {
     public Optional<EasyNPC<?>> npc() {
         return this.getNPC;
     }
+
+    public boolean isXolotlYaSeMudo() {
+        return this.xolotlSeMudo;
+    }
 }

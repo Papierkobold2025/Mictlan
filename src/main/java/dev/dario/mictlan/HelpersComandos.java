@@ -19,12 +19,17 @@ import java.nio.file.Files;
 import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
+import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.api.handler.EasyNPCMotionHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import de.markusbordihn.easynpc.data.objective.ObjectiveDataEntry;
+import de.markusbordihn.easynpc.data.objective.ObjectiveType;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+import de.markusbordihn.easynpc.entity.easynpc.data.NavigationDataCapable;
+import de.markusbordihn.easynpc.handler.ObjectiveHandler;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -129,22 +134,29 @@ public class HelpersComandos {
     */
 
     public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier, Optional<EasyNPC<?>> npc) {
-        BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
-        EasyNPCActionHandler.setState(
-            PlayerConnection.spawnXolotl.get(), 
-            identifier,
-            StateEntry.of(nuevaPosition.getX()),
-            context.getSource().getPlayer()
-        );
-        npcFueMovido = EasyNPCMotionHandler.snapTo(npc.get(), Vec3d.ofBottomCenter(nuevaPosition));
         movimientoNPC = new ConfiguracionNPC(npc);
-        movimientoNPCCompletado = movimientoNPC;
-        if(npcFueMovido) {
-            movimientoNPC.xolotlYaSeMudo(true);
-        } else {
-            MictlanMod.LOGGER.error(npc.toString() + " no ha podido moverse hacia la posicion nueva!");
+        if(movimientoNPC.isXolotlYaSeMudo() == false) {
+            BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
+            EasyNPCActionHandler.setState(
+                npc.get(), 
+                identifier,
+                StateEntry.of(nuevaPosition.getX()),
+                context.getSource().getPlayer()
+            );
+            npcFueMovido = EasyNPCMotionHandler.snapTo(npc.get(), Vec3d.ofBottomCenter(nuevaPosition));
+            movimientoNPCCompletado = movimientoNPC;
+            if(npcFueMovido) {
+                movimientoNPC.xolotlYaSeMudo(true);
+            } else {
+                MictlanMod.LOGGER.error(npc.toString() + " no ha podido moverse hacia la posicion nueva!");
+            };
+            npc.get().getEasyNPCNavigationData().setHomePosition(nuevaPosition);
+            ObjectiveHandler.addOrUpdateCustomObjective(
+                npc.get(), 
+                new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
+            );
+            context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
         }
-        context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
     /**
