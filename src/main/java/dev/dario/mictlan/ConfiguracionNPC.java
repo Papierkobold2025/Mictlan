@@ -83,6 +83,7 @@ public class ConfiguracionNPC {
             );
             EasyNPCActionHandler.schedule(npc, new Identifier("mictlan", "saludo"), 60, lista);
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
+            
             EasyNPCActionHandler.setState(npc, new Identifier("mictlan", "saludo_inicial"), StateEntry.of(true), jugador);
         }
     }

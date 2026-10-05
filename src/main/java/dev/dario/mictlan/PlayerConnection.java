@@ -63,6 +63,7 @@ public class PlayerConnection {
             connectedPlayers.put(playerUUID, playerData);
             if(!hasReceivedStarterKit) {
                 Helpers.entregaKitInicial(playerHandler);
+                playerData.hasReceivedStarterKit(true);
             }
             Helpers.escribirDatosDelJugador(playerUUID);
         };
