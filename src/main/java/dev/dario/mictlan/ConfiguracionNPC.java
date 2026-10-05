@@ -66,7 +66,7 @@ public class ConfiguracionNPC {
             jugadoresSaludados();
             List<ActionDataEntry> lista = List.of(
                 new ActionDataEntry(ActionDataType.MESSAGE, "")
-                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Bienvenidos " + jugador.getName().getString() + "!"))),
+                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Bienvenidos " + cantidadJugadores + "!"))),
                 new ActionDataEntry(ActionDataType.WAIT, "3s"),
                 new ActionDataEntry(ActionDataType.MESSAGE, "")
                     .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Mi nombre es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!"))),
