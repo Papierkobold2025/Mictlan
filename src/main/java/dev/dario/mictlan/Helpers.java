@@ -137,7 +137,7 @@ public class Helpers {
     */
 
     public static void entregaKitInicial(ServerPlayerEntity jugador) {
-        playerData = new PlayerData(jugador.getUuidAsString());
+        playerData = PlayerConnection.connectedPlayers.get(jugador.getUuidAsString());
         try{
             ItemStack welcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
             Identifier welcomeBookIdentifier = new Identifier("patchouli","guide_book");

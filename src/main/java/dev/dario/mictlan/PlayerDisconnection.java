@@ -21,8 +21,8 @@ public class PlayerDisconnection {
             PlayerConnection.playerFilePath = Path.of(WorldLoad.playerDir.toString(), PlayerConnection.playerUUID +".json");
             Helpers.leerDatosDelJugador(handler.getPlayer());
             // Relee el archivo del jugador y lo vuelve a guardar.
-            PlayerConnection.playerDataJsonReturn = MictlanMod.gson.fromJson(PlayerConnection.playerDataJson, PlayerConnection.playerData.getClass());
-            Helpers.escribirDatosDelJugador();
+            PlayerConnection.connectedPlayers.remove(handler.getPlayer().getUuidAsString());
+            Helpers.escribirDatosDelJugador(handler.getPlayer().getUuidAsString());
             String playerName = PlayerConnection.playerHandler.getGameProfile().getName();
             MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
     }

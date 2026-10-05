@@ -36,7 +36,7 @@ public class PlayerConnection {
         String playerName = playerHandler.getGameProfile().getName();
         jugadoresDisponibles.add(playerHandler);
         playerUUID = playerHandler.getGameProfile().getId().toString();
-        playerData = new PlayerData(playerUUID);
+        playerData = new PlayerData(handler.getPlayer().getUuidAsString());
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
         // Xolotl aparece en el spawn la primera vez que alguien entra.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
@@ -47,9 +47,9 @@ public class PlayerConnection {
         if (!Files.exists(playerFilePath)) {
             Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
             playerHandler.sendMessage(welcomeMessage, false);
+            connectedPlayers.put(playerUUID, playerData);
             Helpers.entregaKitInicial(playerHandler);
             Helpers.escribirDatosDelJugador(playerUUID);
-            connectedPlayers.put(playerUUID, playerData);
         } else {
             // Jugador existente.
             Helpers.leerDatosDelJugador(playerHandler);
@@ -60,11 +60,11 @@ public class PlayerConnection {
             boolean hasReceivedStarterKit = playerData.isHasReceivedStarterKit();
             playerData.setEra(MictlanMod.eraActual);
             // Reintento del kit (p. ej. inventario lleno la vez anterior).
+            connectedPlayers.put(playerUUID, playerData);
             if(!hasReceivedStarterKit) {
                 Helpers.entregaKitInicial(playerHandler);
             }
             Helpers.escribirDatosDelJugador(playerUUID);
-            connectedPlayers.put(playerUUID, playerData);
         };
         if (!Files.exists(WorldLoad.mictlanConfigFile)) {
             Helpers.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
