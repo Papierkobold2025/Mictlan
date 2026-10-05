@@ -3,6 +3,7 @@ package dev.dario.mictlan;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import com.mojang.brigadier.context.CommandContext;
@@ -15,12 +16,12 @@ import de.markusbordihn.easynpc.data.action.MessageActionData;
 import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 public class ConfiguracionNPC {
-    private static Integer cantidadJugadores;
     public static PlayerData saludoInicial1;
     public static PlayerData jugadorInteractuando;
     public static StateEntry saludoInicial;
@@ -38,12 +39,11 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    private static void jugadoresSaludados() {
-        cantidadJugadores = PlayerConnection.jugadoresDisponibles.size();
-        int i = 0;
-        while (i < cantidadJugadores) {
-            saludoAJugadores += PlayerConnection.jugadoresDisponibles.get(i).getName().getString() + " y ";
-            i++;
+    private static void jugadoresSaludados(MinecraftServer mundo) {
+        Set<String> jugadoresASaludar = PlayerConnection.connectedPlayers.keySet();
+        for(String jugadores : jugadoresASaludar) {
+            ServerPlayerEntity jugadorConectado = mundo.getPlayerManager().getPlayer(UUID.fromString(jugadores));
+            saludoAJugadores += jugadorConectado.getName().getString() + " y ";
         }
         // Quita el ultimo " y ".
         if (saludoAJugadores.endsWith(" y ")) {
@@ -58,12 +58,11 @@ public class ConfiguracionNPC {
     */
 
     public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {   
-        cantidadJugadores = PlayerConnection.jugadoresDisponibles.size(); 
         MictlanMod.LOGGER.info("[Mictlan] " + jugador.getName().getString() + " interactuo con Xolotl.");
         // El estado vive en el NPC, asi que el saludo solo ocurre una vez.
         saludoInicial = EasyNPCActionHandler.getState(npc, new Identifier("mictlan", "saludo_inicial"));
         if (saludoInicial == null) {
-            jugadoresSaludados();
+            jugadoresSaludados(jugador.getServer());
             List<ActionDataEntry> lista = List.of(
                 new ActionDataEntry(ActionDataType.MESSAGE, "")
                     .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Bienvenidos " + saludoAJugadores + "!"))),

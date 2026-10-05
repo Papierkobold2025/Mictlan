@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ChunkPos;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.util.Identifier;
 
@@ -97,6 +99,18 @@ public class MictlanMod implements ModInitializer {
         
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             PlayerDisconnection.playerDisconnection(handler);
+        });
+
+        /**
+         * -------------------------------------------------------------------------
+         * REGISTROS CUANDO EL JUGADOR MATA ALGO
+         * -------------------------------------------------------------------------
+         */
+
+        ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((server, player, victim)->{
+            if(player instanceof  ServerPlayerEntity jugador) {
+                HelperReputacion.BajarReputacion(server, player, victim);
+            }
         });
 
         /**
