@@ -1,12 +1,14 @@
 package dev.dario.mictlan;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class PlayerDisconnection {
     public static ServerPlayerEntity jugadorDesconectado;
+    public static HashMap<HashMap<String, Integer>, String> estadisticasJugadores = new HashMap<>();
 
     /**
     * -------------------------------------------------------------------------
