@@ -48,7 +48,6 @@ public class PlayerConnection {
             Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
             playerHandler.sendMessage(welcomeMessage, false);
             connectedPlayers.put(playerUUID, playerData);
-            Helpers.entregaKitInicial(playerHandler);
             Helpers.escribirDatosDelJugador(playerUUID);
         } else {
             // Jugador existente.
@@ -57,14 +56,9 @@ public class PlayerConnection {
             Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
             playerHandler.sendMessage(welcomeBackMessage, false);
             playerData.hasPlayedBefore(true);
-            boolean hasReceivedStarterKit = playerData.isHasReceivedStarterKit();
             playerData.setEra(MictlanMod.eraActual);
             // Reintento del kit (p. ej. inventario lleno la vez anterior).
             connectedPlayers.put(playerUUID, playerData);
-            if(!hasReceivedStarterKit) {
-                Helpers.entregaKitInicial(playerHandler);
-                playerData.hasReceivedStarterKit(true);
-            }
             Helpers.escribirDatosDelJugador(playerUUID);
         };
         if (!Files.exists(WorldLoad.mictlanConfigFile)) {
