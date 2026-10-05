@@ -10,7 +10,7 @@ public class ConfiguracionReputacion {
 
     public void PuntosDeReputacion(String jugador, Integer puntos) {
         hashmapReputacion.put(jugador, puntos);
-        PlayerDisconnection.estadisticasJugadores.put(hashmapReputacion, jugador.toString());
+        PlayerConnection.connectedPlayers.get(jugador).playerReputation(hashmapReputacion);
     }
     public void ReputacionAquelarre() {
 

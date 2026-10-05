@@ -21,6 +21,8 @@ public class PlayerData {
     /** Indica en que era se encuentra el jugador */
     private String era;
 
+    private HashMap<String, Integer> statisticPlayers;
+
     /** Crea un registro nuevo asociado al UUID indicado. */
     public PlayerData(String playerUUID) {
         this.playerUUID = playerUUID;
@@ -41,6 +43,10 @@ public class PlayerData {
         this.era = era;
     }
 
+    public void playerReputation (HashMap<String, Integer> reputationStatistic) {
+        this.statisticPlayers = reputationStatistic;
+    }
+
     /** Devuelve si el jugador ya habia jugado anteriormente. */
     public boolean isHasPlayedBefore() {
         return this.hasPlayedBefore;
@@ -59,5 +65,9 @@ public class PlayerData {
     /** Devuelve el UUID del jugador */
     public String getPlayerUUID() {
         return this.playerUUID;
+    }
+
+    public HashMap<String, Integer> isPlayerReputation() {
+        return this.statisticPlayers;
     }
 }
