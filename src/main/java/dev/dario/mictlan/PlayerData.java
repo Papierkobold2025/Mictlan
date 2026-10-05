@@ -47,6 +47,7 @@ public class PlayerData {
         return this.hasReceivedStarterKit;
     }
 
+    /** Devuelve la era en la que se encuentra el jugador. */
     public String isEra() {
         return this.era;
     }

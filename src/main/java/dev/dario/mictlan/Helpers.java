@@ -32,7 +32,6 @@ public class Helpers {
         NbtList entidades;
         ChunkPos posicionChunksMundoNuevo = null;
         if(respuestaArchivoDeConfiguracion.getHomeChunksPasted()) {
-            // LOAD corre una vez por dimension; solo Overworld.
             int counter = 0;
             try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(mictlanCoreDataPath, "*.nbt")) {
                 for (Path archivo : oldWorldDataResources) {

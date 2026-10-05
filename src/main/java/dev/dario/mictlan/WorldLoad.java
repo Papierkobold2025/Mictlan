@@ -22,7 +22,15 @@ public class WorldLoad {
     public static Path mictlanCoreDataPath;
     public static Path mictlanCoreEntitiesPath;
     private static String readMictlanConfigFile;
+
+    /**
+    * -------------------------------------------------------------------------
+    * CREACION DE DIRECTORIOS AL CARGAR EL MUNDO
+    * -------------------------------------------------------------------------
+    */
+
     public static void worldLoad(MinecraftServer servidor, ServerWorld mundo, WorldData CurrentEra){
+        // LOAD corre una vez por dimension; solo nos interesa el Overworld.
         if(mundo.getRegistryKey() == World.OVERWORLD){
             WorldData respuestaArchivoDeConfiguracion;
             mictlanConfigDir = (FabricLoader.getInstance().getConfigDir().resolve("mictlan"));
@@ -31,6 +39,7 @@ public class WorldLoad {
             characterDir = mictlanDir.resolve("character");
             playerDir = mictlanDir.resolve("players");
             worldData = mictlanDir.resolve("world");
+            // Fuera del save del mundo para que sobreviva al cambiar de mundo.
             mictlanCorePath = FabricLoader.getInstance().getGameDir().resolve("mictlan");
             mictlanCoreDataPath = mictlanCorePath.resolve("data");
             mictlanCoreEntitiesPath = mictlanCorePath.resolve("entities");

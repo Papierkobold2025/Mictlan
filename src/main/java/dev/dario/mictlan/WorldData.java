@@ -22,6 +22,7 @@ public class WorldData {
     /** true = hay chunks copiados esperando pegarse en el proximo mundo. */
     private boolean homeChunksPasted;
 
+    /** true = Xolotl ya dio su saludo inicial en esta era. */
     private boolean haRecibidoSaludoInicial;
 
     /** Crea los datos de una era nueva, todavia sin zona "home". */
@@ -40,6 +41,7 @@ public class WorldData {
         this.homeChunksPasted = homeChunkPasted;
     }
 
+    /** Marca si ya se dio el saludo inicial. */
     public void haRecibidoSaludoInicial(boolean haRecibidoSaludoInicial) {
         this.haRecibidoSaludoInicial = haRecibidoSaludoInicial;
     }
@@ -64,6 +66,7 @@ public class WorldData {
         return this.era;
     }
 
+    /** Devuelve si ya se dio el saludo inicial. */
     public boolean isHaRecibidoSaludoInicial() {
         return this.haRecibidoSaludoInicial;
     }

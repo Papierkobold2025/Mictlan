@@ -1,6 +1,7 @@
 package dev.dario.mictlan;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,10 +11,10 @@ import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
 import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.data.action.ActionDataEntry;
 import de.markusbordihn.easynpc.data.action.ActionDataType;
+import de.markusbordihn.easynpc.data.action.MessageActionData;
 import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
-import net.minecraft.advancement.Advancement;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -30,6 +31,13 @@ public class ConfiguracionNPC {
     public static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
+
+    /**
+    * -------------------------------------------------------------------------
+    * NOMBRES DE LOS JUGADORES CONECTADOS ("A y B y C")
+    * -------------------------------------------------------------------------
+    */
+
     private static void jugadoresSaludados() {
         cantidadJugadores = PlayerConnection.jugadoresDisponibles.size();
         int i = 0;
@@ -37,32 +45,53 @@ public class ConfiguracionNPC {
             saludoAJugadores += PlayerConnection.jugadoresDisponibles.get(i).getName().getString() + " y ";
             i++;
         }
-        // Remove the trailing " y "
+        // Quita el ultimo " y ".
         if (saludoAJugadores.endsWith(" y ")) {
             saludoAJugadores = saludoAJugadores.substring(0, saludoAJugadores.length() - 3);
         }
     }
+
+    /**
+    * -------------------------------------------------------------------------
+    * PRIMERA INTERACCION CON XOLOTL
+    * -------------------------------------------------------------------------
+    */
+
     public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {   
         cantidadJugadores = PlayerConnection.jugadoresDisponibles.size(); 
-        ActionDataEntry darLibro = new ActionDataEntry(ActionDataType.COMMAND, "/give @a patchouli:guide_book{\"patchouli:book\":\"mictlan:codice\"}"); 
         MictlanMod.LOGGER.info("[Mictlan] " + jugador.getName().getString() + " interactuo con Xolotl.");
+        // El estado vive en el NPC, asi que el saludo solo ocurre una vez.
         saludoInicial = EasyNPCActionHandler.getState(npc, new Identifier("mictlan", "saludo_inicial"));
         if (saludoInicial == null) {
             jugadoresSaludados();
-            EasyNPCActionHandler.say(npc, "Bienvenidos " + jugador.getName().getString() + "!");
-            EasyNPCActionHandler.say(npc, "Mi nombte es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!");
-            EasyNPCActionHandler.say(npc, "Ahora busquen una casa en este vasto mundo, cuando lleguen, escriban el comando /mictlan home set y yo ire a donde esten!");
-            EasyNPCActionHandler.say(npc, "Andes de que se me olviden, tengan este libro: ");
-            EasyNPCActionHandler.execute(npc, darLibro, null);
-            for(int i = 0; i < cantidadJugadores; i++) {
-                Advancement cherryGroveAdvancement = PlayerConnection.jugadoresDisponibles.get(i).getServer().getAdvancementLoader().get(new Identifier("mictlan", "codice/rumor/bosque_cerezos"));
-                PlayerConnection.jugadoresDisponibles.get(i).getAdvancementTracker().grantCriterion(cherryGroveAdvancement, "otorgado");
-                MictlanMod.LOGGER.info("Jugador " + PlayerConnection.jugadoresDisponibles.get(i).getDisplayName() + " recibió su logro.");
-            }
+            List<ActionDataEntry> lista = List.of(
+                new ActionDataEntry(ActionDataType.MESSAGE, "")
+                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Bienvenidos " + jugador.getName().getString() + "!"))),
+                new ActionDataEntry(ActionDataType.WAIT, "3s"),
+                new ActionDataEntry(ActionDataType.MESSAGE, "")
+                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Mi nombre es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!"))),
+                new ActionDataEntry(ActionDataType.WAIT, "3s"),
+                new ActionDataEntry(ActionDataType.MESSAGE, "")
+                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Ahora busquen una casa en este vasto mundo, cuando lleguen, escriban el comando '/mictlan home set' y yo ire a donde esten!"))),
+                new ActionDataEntry(ActionDataType.WAIT, "3s"),
+                new ActionDataEntry(ActionDataType.MESSAGE, "")
+                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Antes de que se me olvide, tengan este libro: "))),
+                new ActionDataEntry(ActionDataType.WAIT, "3s"),
+                new ActionDataEntry(ActionDataType.COMMAND, "/give @a patchouli:guide_book{\"patchouli:book\":\"mictlan:codice\"}"),
+                new ActionDataEntry(ActionDataType.COMMAND, "/give @a minecraft:wooden_shovel"),
+                new ActionDataEntry(ActionDataType.COMMAND, "/advancement grant @a only mictlan:codice/rumor/bosque_cerezos")
+            );
+            EasyNPCActionHandler.schedule(npc, new Identifier("mictlan", "saludo"), 60, lista);
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
             EasyNPCActionHandler.setState(npc, new Identifier("mictlan", "saludo_inicial"), StateEntry.of(true), jugador);
         }
     }
+
+    /**
+    * -------------------------------------------------------------------------
+    * DATOS DEL NPC
+    * -------------------------------------------------------------------------
+    */
 
     public ConfiguracionNPC(Optional<EasyNPC<?>> npc) {
         this.getNPC = npc;
@@ -72,10 +101,17 @@ public class ConfiguracionNPC {
         this.xolotlSeMudo = xolotlSeMudo;
     }
 
+    /**
+    * -------------------------------------------------------------------------
+    * BUSCAR A XOLOTL Y MANDARLO A LA CASA (/mictlan home set)
+    * -------------------------------------------------------------------------
+    */
+
     public void obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
         HelpersComandos nuevaPosicionNPC = new HelpersComandos();
         Collection<SavedNPCEntityEntry> entidadNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
         for(SavedNPCEntityEntry datosNPC : entidadNPC) {
+            // Si hay varios con el mismo identificador, se queda el ultimo.
             uuidNPC = datosNPC.entityUUID();
         }
         getNPC = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
@@ -84,6 +120,12 @@ public class ConfiguracionNPC {
             nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), getNPC);
         }
     }
+
+    /**
+    * -------------------------------------------------------------------------
+    * GETTERS
+    * -------------------------------------------------------------------------
+    */
 
     public Optional<EasyNPC<?>> npc() {
         return this.getNPC;

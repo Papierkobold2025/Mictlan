@@ -23,6 +23,13 @@ public class PlayerConnection {
     public static Optional<EasyNPC<?>> spawnXolotl;
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayerEntity> jugadoresDisponibles = new ArrayList<>();
+
+    /**
+    * -------------------------------------------------------------------------
+    * CONEXION DE UN JUGADOR
+    * -------------------------------------------------------------------------
+    */
+
     public static void playerConnection(ServerPlayNetworkHandler handler){
         playerHandler = handler.getPlayer();
         String playerName = playerHandler.getGameProfile().getName();
@@ -32,6 +39,7 @@ public class PlayerConnection {
         playerData = new PlayerData(playerUUID);
 
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
+        // Xolotl aparece en el spawn la primera vez que alguien entra.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier(ConfiguracionNPC.identificadoPresetXolotl), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
