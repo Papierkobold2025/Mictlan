@@ -22,6 +22,8 @@ import net.minecraft.registry.Registries;
 
 public class Helpers {
 
+    private static PlayerData playerData;
+
     /**
     * -------------------------------------------------------------------------
     * PEGADO DE CHUNKS EN CONFIGURACION
@@ -106,9 +108,9 @@ public class Helpers {
     * -------------------------------------------------------------------------
     */   
     
-    public static void escribirDatosDelJugador() {
+    public static void escribirDatosDelJugador(String playerUUID) {
         try{
-            Files.writeString(PlayerConnection.playerFilePath, MictlanMod.gson.toJson(PlayerConnection.playerDataJsonReturn));
+            Files.writeString(PlayerConnection.playerFilePath, MictlanMod.gson.toJson(PlayerConnection.connectedPlayers.get(playerUUID)));
         } catch (Exception e) {
             MictlanMod.LOGGER.error("[Mictlan] Datos no escritos a disco!");
         }            
@@ -135,13 +137,15 @@ public class Helpers {
     */
 
     public static void entregaKitInicial(ServerPlayerEntity jugador) {
+        playerData = new PlayerData(jugador.getUuidAsString());
         try{
             ItemStack welcomeItem = new ItemStack(net.minecraft.item.Items.WOODEN_SHOVEL, 1);
             Identifier welcomeBookIdentifier = new Identifier("patchouli","guide_book");
             ItemStack welcomeBook =new ItemStack(Registries.ITEM.get(welcomeBookIdentifier));
+            String playerUUID = jugador.getUuidAsString();
             welcomeBook.getOrCreateNbt().putString("patchouli:book", "mictlan:codice");
             if(PlayerConnection.playerHandler.getInventory().insertStack(welcomeItem) && PlayerConnection.playerHandler.getInventory().insertStack(welcomeBook)) {
-                PlayerConnection.playerDataJsonReturn.hasReceivedStarterKit(true);
+                PlayerConnection.connectedPlayers.put(playerUUID, playerData);
             }
         } catch (Exception e) {
             MictlanMod.LOGGER.error("[Mictlan] No se pudo entregar el objeto de bienvenida al jugador.", e);

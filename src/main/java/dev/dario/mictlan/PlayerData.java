@@ -1,10 +1,14 @@
 package dev.dario.mictlan;
 
+import java.util.HashMap;
+
 /**
  * Clase para almacenar los datos del jugador, incluyendo su UUID, si ha jugado
  * antes y si ha recibido el kit de inicio.
  */
 public class PlayerData {
+
+    public HashMap<String, PlayerData> jugadores;
     /** Identificador unico del jugador dentro del servidor. */
     private String playerUUID;
 
