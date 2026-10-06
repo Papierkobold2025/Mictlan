@@ -21,7 +21,7 @@ public class PlayerData {
     /** Indica en que era se encuentra el jugador */
     private String era;
 
-    private HashMap<String, HashMap<String, Integer>> statisticPlayers;
+    private HashMap<String, Integer> statisticPlayers;
 
     /** Crea un registro nuevo asociado al UUID indicado. */
     public PlayerData(String playerUUID) {
@@ -43,7 +43,7 @@ public class PlayerData {
         this.era = era;
     }
 
-    public void playerReputation (HashMap<String, HashMap<String, Integer>> reputationStatistic) {
+    public void playerReputation (HashMap<String, Integer> reputationStatistic) {
         this.statisticPlayers = reputationStatistic;
     }
 
@@ -67,7 +67,7 @@ public class PlayerData {
         return this.playerUUID;
     }
 
-    public HashMap<String, HashMap<String, Integer>> isPlayerReputation() {
+    public HashMap<String, Integer> isPlayerReputation() {
         return this.statisticPlayers;
     }
 }
