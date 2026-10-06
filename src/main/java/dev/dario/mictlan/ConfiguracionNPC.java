@@ -1,5 +1,8 @@
 package dev.dario.mictlan;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,11 @@ public class ConfiguracionNPC {
     public static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
+    private static String mensaje = "";
+    private static ActionDataEntry messageEntry;
+    private static Identifier rutaDialogos;
+    private static Path rutaDialogosFile;
+    private static String dialogosNPC; 
 
     /**
     * -------------------------------------------------------------------------
@@ -57,15 +65,33 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
+    public static ActionDataEntry mensajesXolotl(String mensaje) {
+        messageEntry = new ActionDataEntry(ActionDataType.MESSAGE, "").withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of(mensaje)));
+        return messageEntry;
+    }
+    public class AccionAxolotl {
+        private String tipo;
+        private String valor;
+    }
+
     public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {   
+        rutaDialogos = new Identifier("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
+        rutaDialogosFile = Path.of(rutaDialogos.getPath());
+        try{
+            dialogosNPC = Files.readString(rutaDialogosFile);
+        } catch(IOException e) {
+            MictlanMod.LOGGER.error("[mictlan] Dialogos del NPC no pudieron ser leidos!", e);
+        }
+        MictlanMod.gson.fromJson(dialogosNPC, AccionAxolotl.class);
+        for(Integer i = 0; i < 1; i++);
+        ActionDataEntry waitTime = new ActionDataEntry(ActionDataType.WAIT, "3s");
         MictlanMod.LOGGER.info("[Mictlan] " + jugador.getName().getString() + " interactuo con Xolotl.");
         // El estado vive en el NPC, asi que el saludo solo ocurre una vez.
         saludoInicial = EasyNPCActionHandler.getState(npc, new Identifier("mictlan", "saludo_inicial"));
         if (saludoInicial == null) {
             jugadoresSaludados(jugador.getServer());
             List<ActionDataEntry> lista = List.of(
-                new ActionDataEntry(ActionDataType.MESSAGE, "")
-                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Bienvenidos " + saludoAJugadores + "!"))),
+                ConfiguracionNPC.mensajesXolotl("Bienvenidos " + saludoAJugadores + "!"),
                 new ActionDataEntry(ActionDataType.WAIT, "3s"),
                 new ActionDataEntry(ActionDataType.MESSAGE, "")
                     .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of("Mi nombre es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!"))),

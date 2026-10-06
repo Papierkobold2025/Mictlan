@@ -1,0 +1,49 @@
+{
+    "nombre": "La Bienvenida",
+    "acciones": [
+        {
+            "tipo": "decir",
+            "valor": "Bienvenidos!"
+        },
+        {
+            "tipo": "esperar",
+            "valor": "3s"
+        },
+        {
+            "tipo": "decir",
+            "valor": "Mi nombre es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!"
+        },
+        {
+            "tipo": "esperar",
+            "valor": "3s"
+        },
+        {
+            "tipo": "decir",
+            "valor": "Ahora busquen una casa en este vasto mundo, cuando lleguen, escriban el comando '/mictlan home set' y yo ire a donde esten!"           
+        },
+        {
+            "tipo": "esperar",
+            "valor": "3s"
+        },
+        {
+            "tipo": "decir",
+            "valor": "Antes de que se me olvide, tengan este libro: "           
+        },
+        {
+            "tipo": "esperar",
+            "valor": "3s"
+        },
+        {
+            "tipo": "comando",
+            "valor": "/give @a patchouli:guide_book{\"patchouli:book\":\"mictlan:codice\"}"
+        },
+        {
+            "tipo": "comando",
+            "valor": "/give @a minecraft:wooden_shovel"  
+        },
+        {
+            "tipo": "comando",
+            "valor": "/advancement grant @a only mictlan:codice/rumor/bosque_cerezos"  
+        }
+    ]
+}

@@ -19,6 +19,7 @@ public class Facciones {
     private HashMap<String, Integer> matar = new HashMap<>();
     private Facciones facciones;
     private String entidadMatada;
+    private ConfiguracionReputacion configuracionReputacion = new ConfiguracionReputacion();
     public void configuracionFacciones(ServerWorld servidor, Entity jugador, LivingEntity entidad) {
         archivoFacciones = servidor.getServer().getResourceManager().getResource(rutaPueblos);
         try (BufferedReader leerFacciones = archivoFacciones.get().getReader()) {
@@ -30,7 +31,7 @@ public class Facciones {
         }
         entidadMatada = EntityType.getId(entidad.getType()).toString();
         if (matar.containsKey(entidadMatada)) {
-            ConfiguracionReputacion.puntosDeReputacion(matar.get(entidadMatada), jugador, facciones.nombre);
+            configuracionReputacion.puntosDeReputacion(matar.get(entidadMatada), jugador, facciones.nombre);
         }
     }
 }
