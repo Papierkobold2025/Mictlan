@@ -2,22 +2,27 @@ package dev.dario.mictlan;
 
 import java.util.HashMap;
 
-import net.minecraft.server.network.ServerPlayerEntity;
-
 public class ConfiguracionReputacion {
-    private Integer reputacion = 0;
-    private HashMap<String, Integer> hashmapReputacion = new HashMap<>();
+    private static Integer reputacion = 0;
+    private static HashMap<String, Integer> hashmapReputacion = new HashMap<>();
 
-    public void PuntosDeReputacion(String jugador, Integer puntos) {
-        hashmapReputacion.put(jugador, puntos);
+
+    private static void PuntosDeReputacion(String jugador, Integer puntos) {
+        if(hashmapReputacion.containsKey(jugador)){
+            reputacion = hashmapReputacion.get(jugador);
+        } else {
+            reputacion = 0;
+        }
+        reputacion += puntos;
+        hashmapReputacion.put(jugador, reputacion);
         PlayerConnection.connectedPlayers.get(jugador).playerReputation(hashmapReputacion);
-    }
+        Helpers.escribirDatosDelJugador(jugador);
+    } 
     public void ReputacionAquelarre() {
 
     }
-    public void ReputacionPueblo(ServerPlayerEntity jugador) {
-        PlayerConnection.connectedPlayers.get(jugador.getUuidAsString());
-
+    public static void ReputacionPueblo(String jugador, Integer puntos) {
+        PuntosDeReputacion(jugador, puntos);
     }
     public void ReputacionMictlan() {
 
