@@ -114,7 +114,6 @@ public class ConfiguracionNPC {
             uuidNPC = datosNPC.entityUUID();
         }
         getNPC = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
-        ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(getNPC);
         if(!getNPC.isEmpty()) {
             nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), getNPC);
         }

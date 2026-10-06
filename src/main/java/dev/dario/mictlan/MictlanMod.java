@@ -112,7 +112,7 @@ public class MictlanMod implements ModInitializer {
         ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((server, player, victim)->{
             if(player instanceof  ServerPlayerEntity jugador) {
                 facciones = new Facciones();
-                facciones.configuracionFacciones(server, player, victim);
+                facciones.configuracionFacciones(server, jugador, victim);
             }
         });
 

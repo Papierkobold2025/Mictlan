@@ -32,6 +32,10 @@ public class Facciones {
         if (matar.containsKey(entidadMatada)) {
             if("Los Pueblos".equals(facciones.nombre)) {
                 ConfiguracionReputacion.ReputacionPueblo(jugador.getUuidAsString(), matar.get(entidadMatada));
+            }else if("El Aquelarre".equals(facciones.nombre)){
+                ConfiguracionReputacion.ReputacionAquelarre(jugador.getUuidAsString(), matar.get(entidadMatada));
+            } else if("Mictlan".equals(facciones.nombre)) {
+                ConfiguracionReputacion.ReputacionMictlan(jugador.getUuidAsString(), matar.get(entidadMatada));
             }
         }
     }
