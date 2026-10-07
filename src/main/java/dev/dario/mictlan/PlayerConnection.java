@@ -34,7 +34,7 @@ public class PlayerConnection {
     public static void playerConnection(ServerPlayNetworkHandler handler){
         playerHandler = handler.getPlayer();
         String playerName = playerHandler.getGameProfile().getName();
-        jugadoresDisponibles.add(playerHandler);
+        //jugadoresDisponibles.add(playerHandler);
         playerUUID = playerHandler.getGameProfile().getId().toString();
         playerData = new PlayerData(handler.getPlayer().getUuidAsString());
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
@@ -52,6 +52,7 @@ public class PlayerConnection {
         } else {
             // Jugador existente.
             Helpers.leerDatosDelJugador(playerHandler);
+            
             playerData = MictlanMod.gson.fromJson(playerDataJson, playerData.getClass());
             Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
             playerHandler.sendMessage(welcomeBackMessage, false);

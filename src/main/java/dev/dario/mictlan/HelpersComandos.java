@@ -32,11 +32,12 @@ import de.markusbordihn.easynpc.handler.ObjectiveHandler;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.nio.file.Path;
 
 public class HelpersComandos {
     private static ChunkPos secondChunk;
-    private static Path worldDataChunks;
+    private static Path worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
     private static String worldChunkData = "";
     private static WorldData  worldChunkDataReturn;
     private static Path mictlanCoreDataFile;
@@ -53,10 +54,8 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
-    public static ConfiguracionNPC movimientoNPCCompletado;
-    public static Optional<EasyNPC<?>> savedNPCEntity;
-    public static ConfiguracionNPC movimientoNPC = new ConfiguracionNPC(savedNPCEntity);
     public UUID uuidNPC;
+    private static ConfiguracionNPC movimientoNPC;
 
     /**
     * -------------------------------------------------------------------------
@@ -83,7 +82,6 @@ public class HelpersComandos {
         player = context.getSource().getPlayer();
         chunk = player.getChunkPos();
         secondChunk = chunk;
-        worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
         MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);
         if(!Files.exists(worldDataChunks)) {
             try {
@@ -131,30 +129,30 @@ public class HelpersComandos {
      * -------------------------------------------------------------------------
     */
 
-    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier, Optional<EasyNPC<?>> npc) {
-        savedNPCEntity = npc;
-        if(movimientoNPC.isXolotlYaSeMudo() == false) {
-            BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
-            EasyNPCActionHandler.setState(
-                savedNPCEntity.get(), 
-                identifier,
-                StateEntry.of(nuevaPosition.getX()),
-                context.getSource().getPlayer()
-            );
-            npcFueMovido = EasyNPCMotionHandler.snapTo(savedNPCEntity.get(), Vec3d.ofBottomCenter(nuevaPosition));
-            movimientoNPCCompletado = movimientoNPC;
-            if(npcFueMovido) {
-                movimientoNPC.xolotlYaSeMudo(true);
-            } else {
-                MictlanMod.LOGGER.error(npc.toString() + " no ha podido moverse hacia la posicion nueva!");
-            };
-            savedNPCEntity.get().getEasyNPCNavigationData().setHomePosition(nuevaPosition);
-            ObjectiveHandler.addOrUpdateCustomObjective(
-                savedNPCEntity.get(), 
-                new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
-            );
-            context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
-        }
+    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier) {
+        
+        Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, identifier);
+        EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
+        movimientoNPC = new ConfiguracionNPC(identifierYNPC);
+        BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
+        EasyNPCActionHandler.setState(
+            identifierEasyNPC, 
+            identifier,
+            StateEntry.of(nuevaPosition.getX()),
+            context.getSource().getPlayer()
+        );
+        npcFueMovido = EasyNPCMotionHandler.snapTo(identifierEasyNPC, Vec3d.ofBottomCenter(nuevaPosition));
+        if(npcFueMovido) {
+            movimientoNPC.xolotlYaSeMudo(true);
+        } else {
+            MictlanMod.LOGGER.error(identifierYNPC.toString() + " no ha podido moverse hacia la posicion nueva!");
+        };
+        identifierEasyNPC.getEasyNPCNavigationData().setHomePosition(nuevaPosition);
+        ObjectiveHandler.addOrUpdateCustomObjective(
+            identifierEasyNPC, 
+            new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
+        );
+        context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
     /**
@@ -222,5 +220,22 @@ public class HelpersComandos {
         } catch (Exception e) {
             MictlanMod.LOGGER.error("[Mictlan] Datos de los chunks no pueden ser borrados");
         }
+    }
+
+    /**
+    * -------------------------------------------------------------------------
+    * LEER REPUTACION POR FACCION DEL PERSONAJE
+    * -------------------------------------------------------------------------
+    */    
+
+    public static Integer leerReputacionPorFaccion(CommandContext<ServerCommandSource> context, String faccion) {
+        String jugador = context.getSource().getPlayer().getUuidAsString();
+        Integer puntosDeReputacion = 0;
+        HashMap<String, Integer> reputacionDelJugador = PlayerConnection.connectedPlayers.get(jugador).isPlayerReputation();
+        if(reputacionDelJugador.containsKey(faccion)) {
+            puntosDeReputacion = 0;
+            puntosDeReputacion = reputacionDelJugador.get(faccion);
+        } 
+        return puntosDeReputacion;
     }
 }

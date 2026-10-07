@@ -1,6 +1,7 @@
 package dev.dario.mictlan;
 
 import net.fabricmc.api.ModInitializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -51,6 +52,8 @@ public class MictlanMod implements ModInitializer {
     PlayerData playerData;
 
     private Facciones facciones;
+
+    private Integer reputacionFaccion = 0;
 
     /**
      * -------------------------------------------------------------------------
@@ -147,9 +150,12 @@ public class MictlanMod implements ModInitializer {
                 .then(CommandManager.literal("home")
                     .then(CommandManager.literal("set")
                         .executes(context -> {
-                            ConfiguracionNPC.configuracionNPC.obtenerNPC(context, new Identifier(ConfiguracionNPC.xolotlNPCIdentifier));
+                            HelpersComandos helpersComandos = new HelpersComandos();
+                            helpersComandos.marcarNuevaUbicacionNPC(context, new Identifier(ConfiguracionNPC.xolotlNPCIdentifier));
                             return 1;
-                        })))
+                        })
+                    )
+                )
 
                 /**
                 * -----------------------------------------------------------------
@@ -192,6 +198,37 @@ public class MictlanMod implements ModInitializer {
                         })
                     )
                 )
+
+                /**
+                 * -----------------------------------------------------------------
+                 * /mictlan faccion
+                 * -----------------------------------------------------------------
+                 */
+                          
+                .then(CommandManager.literal("faccion")
+                    .then(CommandManager.literal("Pueblos")
+                        .executes(context -> {
+                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Pueblos");
+                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion con la faccion de los pueblos es: " + reputacionFaccion), false);
+                            return 1;
+                        })
+                    )
+                    .then(CommandManager.literal("Aquelarre")
+                        .executes(context -> {
+                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Aquelarre");
+                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion con la faccion del aquelarre es: " + reputacionFaccion), false);
+                            return 1;
+                        })
+                    )
+                    .then(CommandManager.literal("Mictlan")
+                        .executes(context -> {
+                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Mictlan");
+                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion en Mictlan es: " + reputacionFaccion), false);
+                            return 1;
+                        })
+                    )
+                )
+                
             );
         });
     };

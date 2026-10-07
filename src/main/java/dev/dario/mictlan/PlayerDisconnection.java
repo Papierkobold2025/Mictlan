@@ -25,7 +25,7 @@ public class PlayerDisconnection {
             // Relee el archivo del jugador y lo vuelve a guardar.
             Helpers.escribirDatosDelJugador(handler.getPlayer().getUuidAsString());
             PlayerConnection.connectedPlayers.remove(handler.getPlayer().getUuidAsString());
-            String playerName = PlayerConnection.playerHandler.getGameProfile().getName();
-            MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
+            //String playerName = PlayerConnection.playerHandler.getGameProfile().getName();
+            //MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se desconecto.");
     }
 }

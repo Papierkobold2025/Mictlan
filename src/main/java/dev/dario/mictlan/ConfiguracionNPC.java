@@ -39,6 +39,7 @@ public class ConfiguracionNPC {
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl;
+    private static Optional<EasyNPC<?>> easyNPCOptional;
 
     /**
     * -------------------------------------------------------------------------
@@ -133,23 +134,34 @@ public class ConfiguracionNPC {
         this.xolotlSeMudo = xolotlSeMudo;
     }
 
+    public Optional<EasyNPC<?>> npc() {
+        return this.getNPC;
+    }
+
+    public boolean isXolotlYaSeMudo() {
+        return this.xolotlSeMudo;
+    }
+
     /**
     * -------------------------------------------------------------------------
     * BUSCAR A XOLOTL Y MANDARLO A LA CASA (/mictlan home set)
     * -------------------------------------------------------------------------
     */
 
-    public void obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
-        HelpersComandos nuevaPosicionNPC = new HelpersComandos();
+    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
+        
         Collection<SavedNPCEntityEntry> entidadNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
         for(SavedNPCEntityEntry datosNPC : entidadNPC) {
             // Si hay varios con el mismo identificador, se queda el ultimo.
             uuidNPC = datosNPC.entityUUID();
         }
-        getNPC = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
-        if(!getNPC.isEmpty()) {
-            nuevaPosicionNPC.marcarNuevaUbicacionNPC(context, new Identifier(xolotlNPCIdentifier), getNPC);
+        easyNPCOptional = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
+        if(!easyNPCOptional.isEmpty()) {
+            if(isXolotlYaSeMudo() == false) {
+                return easyNPCOptional;
+            }
         }
+        return null;
     }
 
     /**
@@ -158,11 +170,5 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public Optional<EasyNPC<?>> npc() {
-        return this.getNPC;
-    }
 
-    public boolean isXolotlYaSeMudo() {
-        return this.xolotlSeMudo;
-    }
 }

@@ -8,15 +8,18 @@ public class ConfiguracionReputacion {
     private Integer reputacion = 0;
     private HashMap<String, Integer> hashMapReputacionPorFaccion = new HashMap<>();
     private String playerEntity = ""; 
-    public void puntosDeReputacion(Integer puntos, Entity jugador, String faccion) {
+    private HashMap<String, Integer> reputacionResultante = new HashMap<>();
+    public HashMap<String, Integer> puntosDeReputacion(Integer puntos, Entity jugador, String faccion) {
         playerEntity = jugador.getUuidAsString();
         hashMapReputacionPorFaccion = PlayerConnection.connectedPlayers.get(playerEntity).isPlayerReputation();
         if(hashMapReputacionPorFaccion.containsKey(faccion)){
             reputacion = puntos + hashMapReputacionPorFaccion.get(faccion);
         } else { 
             reputacion = puntos;        
-        }
+        } 
         hashMapReputacionPorFaccion.put(faccion, reputacion);
         Helpers.escribirDatosDelJugador(playerEntity);
+        reputacionResultante.put(faccion, reputacion);
+        return reputacionResultante;
     } 
 }
