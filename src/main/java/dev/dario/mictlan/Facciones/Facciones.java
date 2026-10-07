@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Optional;
 
 import dev.dario.mictlan.Core.MictlanMod;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.resource.Resource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 
 public class Facciones {
-    private Identifier rutaPueblos = new Identifier("mictlan_medieval", "facciones/pueblos.json");
+    private ResourceLocation rutaPueblos = new ResourceLocation("mictlan_medieval", "facciones/pueblos.json");
     private List<Optional<Resource>> archivosFacciones = new ArrayList<>(); 
     private String nombre;
     private HashMap<String, Integer> matar = new HashMap<>();
@@ -25,10 +25,10 @@ public class Facciones {
     private FaccionPueblos faccionPueblos = new FaccionPueblos();
     private ConfiguracionReputacion configuracionReputacion = new ConfiguracionReputacion();
     private HashMap<String, Integer> reputacionFaccion = new HashMap<>();
-    public void configuracionFacciones(ServerWorld servidor, Entity jugador, LivingEntity entidad) {
-        archivosFacciones.add(servidor.getServer().getResourceManager().getResource(rutaPueblos));
+    public void configuracionFacciones(MinecraftServer servidor, Entity jugador, LivingEntity entidad) {
+        archivosFacciones.add(servidor.getResourceManager().getResource(rutaPueblos));
         for(Optional<Resource> faccion : archivosFacciones){
-            try (BufferedReader leerFacciones = faccion.get().getReader()) {
+            try (BufferedReader leerFacciones = faccion.get().openAsReader()) {
                 facciones = MictlanMod.gson.fromJson(leerFacciones, Facciones.class);
                 nombre = facciones.nombre;
                 matar = facciones.matar;
@@ -36,7 +36,7 @@ public class Facciones {
                 MictlanMod.LOGGER.error("[Mictlan] No se pudo obtener el objeto de Facciones.");
             }
         }
-        entidadMatada = EntityType.getId(entidad.getType()).toString();
+        entidadMatada = EntityType.getKey(entidad.getType()).toString();
         if (matar.containsKey(entidadMatada)) {
             reputacionFaccion = configuracionReputacion.puntosDeReputacion(matar.get(entidadMatada), jugador, facciones.nombre);
         }

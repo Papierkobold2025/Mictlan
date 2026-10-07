@@ -1,7 +1,8 @@
 package dev.dario.mictlan.Players;
 
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,19 +16,17 @@ import dev.dario.mictlan.NPC.ConfiguracionNPC;
 import dev.dario.mictlan.World.WorldLoad;
 
 import java.nio.file.Files;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 public class PlayerConnection {
-    public static ServerPlayerEntity playerHandler;
+    public static ServerPlayer playerHandler;
     public static String playerUUID; 
     public static PlayerData playerData;
     public static Path playerFilePath;
     public static HashMap<String, PlayerData> connectedPlayers = new HashMap<>();
     public static Optional<EasyNPC<?>> spawnXolotl;
     public static String playerDataJson = "";
-    public static ArrayList<ServerPlayerEntity> jugadoresDisponibles = new ArrayList<>();
+    public static ArrayList<ServerPlayer> jugadoresDisponibles = new ArrayList<>();
 
     /**
     * -------------------------------------------------------------------------
@@ -35,22 +34,22 @@ public class PlayerConnection {
     * -------------------------------------------------------------------------
     */
 
-    public static void playerConnection(ServerPlayNetworkHandler handler){
-        playerHandler = handler.getPlayer();
+    public static void playerConnection(ServerPlayer handler){
+        playerHandler = handler;
         String playerName = playerHandler.getGameProfile().getName();
         //jugadoresDisponibles.add(playerHandler);
         playerUUID = playerHandler.getGameProfile().getId().toString();
-        playerData = new PlayerData(handler.getPlayer().getUuidAsString());
+        playerData = new PlayerData(handler.getStringUUID());
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
         // Xolotl aparece en el spawn la primera vez que alguien entra.
-        if(EasyNPCEntityHandler.getByCustomIdentifier(new Identifier(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
+        if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
-            spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new Identifier(ConfiguracionNPC.identificadoPresetXolotl), playerHandler.getServer().getOverworld(), Vec3d.ofBottomCenter(playerHandler.getServer().getOverworld().getSpawnPos()), null, null);
+            spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), playerHandler.getServer().overworld(), Vec3.atBottomCenterOf(playerHandler.getServer().overworld().getSharedSpawnPos()), null, null);
         }
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
-            Text welcomeMessage = Text.literal("Bienvenido a Mictlan, " + playerName + "!");
-            playerHandler.sendMessage(welcomeMessage, false);
+            Component welcomeMessage = Component.literal("Bienvenido a Mictlan, " + playerName + "!");
+            playerHandler.sendSystemMessage(welcomeMessage, false);
             connectedPlayers.put(playerUUID, playerData);
             Helpers.escribirDatosDelJugador(playerUUID);
         } else {
@@ -58,8 +57,8 @@ public class PlayerConnection {
             Helpers.leerDatosDelJugador(playerHandler);
             
             playerData = MictlanMod.gson.fromJson(playerDataJson, playerData.getClass());
-            Text welcomeBackMessage = Text.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
-            playerHandler.sendMessage(welcomeBackMessage, false);
+            Component welcomeBackMessage = Component.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
+            playerHandler.sendSystemMessage(welcomeBackMessage, false);
             playerData.hasPlayedBefore(true);
             playerData.setEra(MictlanMod.eraActual);
             // Reintento del kit (p. ej. inventario lleno la vez anterior).
@@ -69,8 +68,8 @@ public class PlayerConnection {
         if (!Files.exists(WorldLoad.mictlanConfigFile)) {
             Helpers.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
         }
-        Text eraMessage = Text.literal("Te encuentras en la era " + MictlanMod.eraActual);
-        playerHandler.sendMessage(eraMessage, false);
+        Component eraMessage = Component.literal("Te encuentras en la era " + MictlanMod.eraActual);
+        playerHandler.sendSystemMessage(eraMessage, false);
 
         MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se conecto.");
     }

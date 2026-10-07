@@ -1,54 +1,71 @@
 plugins {
-	id 'fabric-loom' version '1.7-SNAPSHOT'
-	id 'maven-publish'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
-version = project.mod_version
-group = project.maven_group
+version = mod_version
+group = maven_group
 
 base {
-	archivesName = project.archives_base_name
+    archivesName = archives_base_name
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                mictlan {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                mictlan {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 repositories {
-	// Aqui se añadiran mas adelante los repos Maven de mods de los que dependamos
-	// de verdad (Nexus Characters, LevelZ...). De momento no hace falta ninguno.
+    mavenCentral()
 }
 
 dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modCompileOnly files("libs/easy_npc-api-7.13.1.jar")
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-	// Fabric API: no es obligatoria para un mod vacio, pero el siguiente paso
-	// (enganchar eventos de Fabric como ServerPlayConnectionEvents) la necesita,
-	// asi que la dejamos declarada desde ya.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    compileOnly files('libs/easy_npc-forge-1.20.1-7.14.0.jar')
 }
 
-java {
-	withSourcesJar()
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+        minecraft_version: minecraft_version,
+        forge_version: forge_version,
+        mod_id: mod_id,
+        mod_version: mod_version
+    ]
+
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml']) {
+        expand replaceProperties
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.encoding = "UTF-8"
-	it.options.release = 17
-}
-
-processResources {
-	def version = project.version
-	inputs.property "version", version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": version
-	}
-}
-
-afterEvaluate {
-    tasks.named('downloadAssets') {
-        downloadThreads = 2
-    }
+    options.encoding = 'UTF-8'
 }

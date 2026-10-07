@@ -20,11 +20,11 @@ import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import dev.dario.mictlan.Core.MictlanMod;
 import dev.dario.mictlan.Players.PlayerConnection;
-import net.minecraft.resource.Resource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ConfiguracionNPC {
     public static StateEntry saludoInicial;
@@ -36,7 +36,7 @@ public class ConfiguracionNPC {
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
     private static String messageContent;
-    private static Identifier rutaDialogos;
+    private static ResourceLocation rutaDialogos;
     private static Optional<Resource> rutaDialogosFile;
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
@@ -52,7 +52,7 @@ public class ConfiguracionNPC {
     private static void jugadoresSaludados(MinecraftServer mundo) {
         Set<String> jugadoresASaludar = PlayerConnection.connectedPlayers.keySet();
         for(String jugadores : jugadoresASaludar) {
-            ServerPlayerEntity jugadorConectado = mundo.getPlayerManager().getPlayer(UUID.fromString(jugadores));
+            ServerPlayer jugadorConectado = mundo.getPlayerList().getPlayer(UUID.fromString(jugadores));
             saludoAJugadores += jugadorConectado.getName().getString() + " y ";
         }
         // Quita el ultimo " y ".
@@ -78,7 +78,7 @@ public class ConfiguracionNPC {
         private String valor;
     }
 
-    public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayerEntity jugador) {
+    public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
         jugadoresSaludados(jugador.getServer());
             messageContent = "Bienvenidos " + saludoAJugadores + "!";
             mensajesXolotl.add(
@@ -100,23 +100,23 @@ public class ConfiguracionNPC {
                             ActionDataType.COMMAND, guardarMensajes.get(i).valor));
                 }
             }
-            EasyNPCActionHandler.schedule(npc, new Identifier("mictlan", "saludo"), 60, mensajesXolotl);
+            EasyNPCActionHandler.schedule(npc, new ResourceLocation("mictlan", "saludo"), 60, mensajesXolotl);
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
             EasyNPCActionHandler.setState(
-                npc, new Identifier("mictlan", "saludo_inicial"), 
+                npc, new ResourceLocation("mictlan", "saludo_inicial"), 
                 StateEntry.of(true), jugador);
     }
 
-    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayerEntity jugador) {   
-        rutaDialogos = new Identifier("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
+    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {   
+        rutaDialogos = new ResourceLocation("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
         rutaDialogosFile = jugador.getServer().getResourceManager().getResource(rutaDialogos);
-        try (BufferedReader leerDialogos = rutaDialogosFile.get().getReader()){
+        try (BufferedReader leerDialogos = rutaDialogosFile.get().openAsReader()){
             dialogosNPC = MictlanMod.gson.fromJson(leerDialogos, AccionesXolotl.class);
             dialogosXolotl = dialogosNPC.xolotl.bienvenida;
         } catch(IOException e) {
             MictlanMod.LOGGER.error("[mictlan] Dialogos del NPC no pudieron ser leidos!", e);
         }
-        saludoInicial = EasyNPCActionHandler.getState(npc, new Identifier("mictlan", "saludo_inicial"));
+        saludoInicial = EasyNPCActionHandler.getState(npc, new ResourceLocation("mictlan", "saludo_inicial"));
         if(saludoInicial == null) {
            mensajesXolotl(npc, dialogosXolotl, jugador);
         }
@@ -150,14 +150,14 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<ServerCommandSource> context, Identifier npcAObtener) {
+    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<CommandSourceStack> context, ResourceLocation npcAObtener) {
         
         Collection<SavedNPCEntityEntry> entidadNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
         for(SavedNPCEntityEntry datosNPC : entidadNPC) {
             // Si hay varios con el mismo identificador, se queda el ultimo.
             uuidNPC = datosNPC.entityUUID();
         }
-        easyNPCOptional = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getWorld());
+        easyNPCOptional = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getLevel());
         if(!easyNPCOptional.isEmpty()) {
             if(isXolotlYaSeMudo() == false) {
                 return easyNPCOptional;

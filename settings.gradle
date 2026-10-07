@@ -1,13 +1,11 @@
 pluginManagement {
-	repositories {
-		maven {
-			name = 'Fabric'
-			url = 'https://maven.fabricmc.net/'
-		}
-		mavenCentral()
-		gradlePluginPortal()
-	}
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
 }
 
-// Debe coincidir con el modid. Cambialo si renombras el mod.
-rootProject.name = 'mictlan'
+rootProject.name = 'Mictlan'

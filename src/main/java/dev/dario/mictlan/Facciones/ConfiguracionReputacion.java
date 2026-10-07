@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import dev.dario.mictlan.Helpers.Helpers;
 import dev.dario.mictlan.Players.PlayerConnection;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 public class ConfiguracionReputacion {
     private Integer reputacion = 0;
@@ -12,7 +12,7 @@ public class ConfiguracionReputacion {
     private String playerEntity = ""; 
     private HashMap<String, Integer> reputacionResultante = new HashMap<>();
     public HashMap<String, Integer> puntosDeReputacion(Integer puntos, Entity jugador, String faccion) {
-        playerEntity = jugador.getUuidAsString();
+        playerEntity = jugador.getStringUUID();
         hashMapReputacionPorFaccion = PlayerConnection.connectedPlayers.get(playerEntity).isPlayerReputation();
         if(hashMapReputacionPorFaccion.containsKey(faccion)){
             reputacion = puntos + hashMapReputacionPorFaccion.get(faccion);

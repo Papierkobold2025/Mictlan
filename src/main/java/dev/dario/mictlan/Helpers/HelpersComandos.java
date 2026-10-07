@@ -2,16 +2,19 @@ package dev.dario.mictlan.Helpers;
 
 import java.io.IOException;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.nio.file.Files;
@@ -20,9 +23,7 @@ import com.mojang.brigadier.context.CommandContext;
 
 import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
 import de.markusbordihn.easynpc.api.handler.EasyNPCMotionHandler;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.phys.AABB;
 import de.markusbordihn.easynpc.data.objective.ObjectiveDataEntry;
 import de.markusbordihn.easynpc.data.objective.ObjectiveType;
 import de.markusbordihn.easynpc.data.state.StateEntry;
@@ -47,12 +48,12 @@ public class HelpersComandos {
     private static WorldData  worldChunkDataReturn;
     private static Path mictlanCoreDataFile;
     private static Path mictlanCoreEntitiesFile;
-    private static ServerWorld mundoParaTransportar;
+    private static ServerLevel mundoParaTransportar;
     private static List<Entity> entidadesDelChunk;
-    private static NbtCompound entidadesAGuardar;
-    private static NbtCompound archivoEntidades;
-    private static Box caja;
-    private static ServerPlayerEntity player;
+    private static CompoundTag entidadesAGuardar;
+    private static CompoundTag archivoEntidades;
+    private static AABB caja;
+    private static ServerPlayer player;
     public static ChunkPos chunk;
     public static ChunkPos firstChunk;
     private static boolean npcFueMovido;
@@ -68,9 +69,9 @@ public class HelpersComandos {
     * -------------------------------------------------------------------------
     */
 
-    public static void primeraEsquina(CommandContext<ServerCommandSource> context) {
+    public static void primeraEsquina(CommandContext<CommandSourceStack> context) {
         player = context.getSource().getPlayer();
-        chunk = player.getChunkPos();
+        chunk = player.chunkPosition();
         homeChunksX.clear();
         homeChunksZ.clear();
         totalChunkPosCount.clear();
@@ -83,9 +84,9 @@ public class HelpersComandos {
     * -------------------------------------------------------------------------
     */
 
-    public static void segundaEsquina(CommandContext<ServerCommandSource> context) {
+    public static void segundaEsquina(CommandContext<CommandSourceStack> context) {
         player = context.getSource().getPlayer();
-        chunk = player.getChunkPos();
+        chunk = player.chunkPosition();
         secondChunk = chunk;
         MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);
         if(!Files.exists(worldDataChunks)) {
@@ -134,19 +135,19 @@ public class HelpersComandos {
      * -------------------------------------------------------------------------
     */
 
-    public void marcarNuevaUbicacionNPC(CommandContext<ServerCommandSource> context, Identifier identifier) {
+    public void marcarNuevaUbicacionNPC(CommandContext<CommandSourceStack> context, ResourceLocation identifier) {
         
         Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, identifier);
         EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
         movimientoNPC = new ConfiguracionNPC(identifierYNPC);
-        BlockPos nuevaPosition = context.getSource().getPlayer().getBlockPos();
+        BlockPos nuevaPosition = context.getSource().getPlayer().blockPosition();
         EasyNPCActionHandler.setState(
             identifierEasyNPC, 
             identifier,
             StateEntry.of(nuevaPosition.getX()),
             context.getSource().getPlayer()
         );
-        npcFueMovido = EasyNPCMotionHandler.snapTo(identifierEasyNPC, Vec3d.ofBottomCenter(nuevaPosition));
+        npcFueMovido = EasyNPCMotionHandler.snapTo(identifierEasyNPC, Vec3.atBottomCenterOf(nuevaPosition));
         if(npcFueMovido) {
             movimientoNPC.xolotlYaSeMudo(true);
         } else {
@@ -157,7 +158,7 @@ public class HelpersComandos {
             identifierEasyNPC, 
             new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
         );
-        context.getSource().sendFeedback(() -> Text.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
+        context.getSource().sendSuccess(() -> Component.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
     } 
 
     /**
@@ -166,13 +167,13 @@ public class HelpersComandos {
     * -------------------------------------------------------------------------
     */
 
-    public static void guardarCasaEnDisco(CommandContext<ServerCommandSource> context, ChunkPos chunks) {
+    public static void guardarCasaEnDisco(CommandContext<CommandSourceStack> context, ChunkPos chunks) {
         mictlanCoreDataFile = Path.of(WorldLoad.mictlanCoreDataPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
-        mundoParaTransportar = context.getSource().getWorld();
+        mundoParaTransportar = context.getSource().getLevel();
         // Vacio si el chunk nunca se ha guardado en disco.
-        Optional<NbtCompound> datosChunk = mundoParaTransportar.getChunkManager().threadedAnvilChunkStorage.getNbt(chunks).join();
+        Optional<CompoundTag> datosChunk = mundoParaTransportar.getChunkSource().chunkMap.read(chunks).join();
         if(datosChunk.isPresent()) {
-            MictlanMod.LOGGER.info("[Mictlan] " + datosChunk.get().getKeys());
+            MictlanMod.LOGGER.info("[Mictlan] " + datosChunk.get().getAllKeys());
             try{
                 NbtIo.writeCompressed(datosChunk.get(), mictlanCoreDataFile.toFile());
             } catch(IOException e) {
@@ -190,17 +191,17 @@ public class HelpersComandos {
     public static void guardarEntidadesEnDisco(ChunkPos chunks) {
         mictlanCoreEntitiesFile = Path.of(WorldLoad.mictlanCoreEntitiesPath.toString(), "Chunk_" + chunks.x + " " + chunks.z + ".nbt");
         // Entidades: se buscan por volumen (+1 porque getEnd es inclusivo).
-        caja = new Box(chunks.getStartX(), mundoParaTransportar.getBottomY(), chunks.getStartZ(), chunks.getEndX() + 1, mundoParaTransportar.getTopY(), chunks.getEndZ() +1);
-        entidadesDelChunk = mundoParaTransportar.getOtherEntities(null, caja);
-        NbtList listaEntidades = new NbtList();
+        caja = new AABB(chunks.getMinBlockX(), mundoParaTransportar.getMinBuildHeight(), chunks.getMinBlockZ(), chunks.getMaxBlockX() + 1, mundoParaTransportar.getMaxBuildHeight(), chunks.getMaxBlockZ() +1);
+        entidadesDelChunk = mundoParaTransportar.getEntities(null, caja);
+        ListTag listaEntidades = new ListTag();
         for (Entity entity : entidadesDelChunk) {
-            entidadesAGuardar = new NbtCompound();
+            entidadesAGuardar = new CompoundTag();
             // false para jugadores, pasajeros y entidades removidas.
-            if (entity.saveSelfNbt(entidadesAGuardar)) {
+            if (entity.save(entidadesAGuardar)) {
                 listaEntidades.add(entidadesAGuardar);
             }
         }
-        archivoEntidades = new NbtCompound();
+        archivoEntidades = new CompoundTag();
         archivoEntidades.put("entidades", listaEntidades);
         try {
             NbtIo.writeCompressed(archivoEntidades, mictlanCoreEntitiesFile.toFile());
@@ -233,8 +234,8 @@ public class HelpersComandos {
     * -------------------------------------------------------------------------
     */    
 
-    public static Integer leerReputacionPorFaccion(CommandContext<ServerCommandSource> context, String faccion) {
-        String jugador = context.getSource().getPlayer().getUuidAsString();
+    public static Integer leerReputacionPorFaccion(CommandContext<CommandSourceStack> context, String faccion) {
+        String jugador = context.getSource().getPlayer().getStringUUID();
         Integer puntosDeReputacion = 0;
         HashMap<String, Integer> reputacionDelJugador = PlayerConnection.connectedPlayers.get(jugador).isPlayerReputation();
         if(reputacionDelJugador.containsKey(faccion)) {

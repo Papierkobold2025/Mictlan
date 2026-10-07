@@ -1,22 +1,26 @@
 package dev.dario.mictlan.Core;
 
-import net.fabricmc.api.ModInitializer;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.ChunkPos;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.util.Identifier;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.ResourceLocation;
 
 import com.google.gson.Gson;
 
 import de.markusbordihn.easynpc.api.action.ActionRegistry;
+import dev.dario.mictlan.Facciones.FaccionPueblos;
 import dev.dario.mictlan.Facciones.Facciones;
 import dev.dario.mictlan.Helpers.Helpers;
 import dev.dario.mictlan.Helpers.HelpersComandos;
@@ -26,13 +30,20 @@ import dev.dario.mictlan.Players.PlayerData;
 import dev.dario.mictlan.Players.PlayerDisconnection;
 import dev.dario.mictlan.World.WorldData;
 import dev.dario.mictlan.World.WorldLoad;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+
 
 /**
  * Punto de entrada del mod. Registra eventos de mundo, conexion de
  * jugadores y el comando /mictlan.
  */
 
-public class MictlanMod implements ModInitializer {
+@Mod(MictlanMod.MOD_ID)
+public class MictlanMod {
 
     /**
      * -------------------------------------------------------------------------
@@ -43,7 +54,6 @@ public class MictlanMod implements ModInitializer {
     public static final String MOD_ID = "mictlan";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-
     public static final Gson gson = new Gson();
 
     public static int commandExecuted = 0;
@@ -60,7 +70,9 @@ public class MictlanMod implements ModInitializer {
 
     PlayerData playerData;
 
-    private Facciones facciones;
+    private Facciones facciones = new Facciones();
+
+    private FaccionPueblos faccionPueblos = new FaccionPueblos();
 
     private Integer reputacionFaccion = 0;
 
@@ -70,10 +82,21 @@ public class MictlanMod implements ModInitializer {
      * -------------------------------------------------------------------------
      */
 
-    @Override
-    public void onInitialize() {
+    public MictlanMod() {
+
+        MinecraftForge.EVENT_BUS.addListener(this::onPlayerDisconnect);
+        MinecraftForge.EVENT_BUS.addListener(this::onEntityKilled);
+        MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+        MinecraftForge.EVENT_BUS.addListener(this::onPlayerConnect);
+        MinecraftForge.EVENT_BUS.addListener(this::onWorldLoad);
+        MinecraftForge.EVENT_BUS.addListener(this::onVillagerTrade);
 
         LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
+
+        ActionRegistry.register(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{    
+            ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
+        });
+    }
 
         /**
          * -------------------------------------------------------------------------
@@ -81,9 +104,12 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        ServerWorldEvents.LOAD.register((server,world) -> {
-            WorldLoad.worldLoad(server,world,CurrentEra);
-        });
+        private void onWorldLoad(LevelEvent.Load event)  {
+            if(event.getLevel() instanceof ServerLevel world) {
+                MinecraftServer server = world.getServer();
+                WorldLoad.worldLoad(server,world,CurrentEra);
+            }
+        }
 
         /**
          * -------------------------------------------------------------------------
@@ -91,9 +117,11 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            PlayerConnection.playerConnection(handler);
-        });
+        private void onPlayerConnect(PlayerEvent.PlayerLoggedInEvent event) {
+            if(event.getEntity() instanceof ServerPlayer handler){
+                PlayerConnection.playerConnection(handler);
+            }
+        }
 
         /**
          * -------------------------------------------------------------------------
@@ -101,9 +129,7 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        ActionRegistry.register(new Identifier(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{
-            ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
-        });
+
 
         /**
          * -------------------------------------------------------------------------
@@ -111,9 +137,9 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
         
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            PlayerDisconnection.playerDisconnection(handler);
-        });
+        private void onPlayerDisconnect(PlayerEvent.PlayerLoggedOutEvent event){
+            PlayerDisconnection.playerDisconnection(event);
+        }
 
         /**
          * -------------------------------------------------------------------------
@@ -121,12 +147,14 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((server, player, victim)->{
-            if(player instanceof  ServerPlayerEntity jugador) {
-                facciones = new Facciones();
+        private void onEntityKilled(LivingDeathEvent event) {
+            Entity killer = event.getSource().getEntity();
+            if(killer instanceof ServerPlayer jugador) {
+                LivingEntity victim = event.getEntity();
+                MinecraftServer server = jugador.getServer();
                 facciones.configuracionFacciones(server, jugador, victim);
             }
-        });
+        }
 
         /**
          * -------------------------------------------------------------------------
@@ -134,6 +162,17 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
+        private void onVillagerTrade(TradeWithVillagerEvent event) {
+            HashMap<String, Integer> reputacionDeJugador = new HashMap<>();
+            if(event.getEntity() instanceof ServerPlayer jugador) {
+                if(facciones.isReputacionFaccion().isEmpty()) {
+                    reputacionDeJugador.put("Pueblos", 0);
+                    faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
+                } else {
+                    faccionPueblos.cambioReputacion(jugador, facciones.isReputacionFaccion());
+                }
+            }
+        }
 
         /**
          * -------------------------------------------------------------------------
@@ -141,8 +180,8 @@ public class MictlanMod implements ModInitializer {
          * -------------------------------------------------------------------------
          */
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(CommandManager.literal("mictlan")
+        private void onRegisterCommands(RegisterCommandsEvent event) {
+            event.getDispatcher().register(Commands.literal("mictlan")
 
                 /**
                 * -----------------------------------------------------------------
@@ -150,9 +189,11 @@ public class MictlanMod implements ModInitializer {
                 * -----------------------------------------------------------------
                 */
 
-                .then(CommandManager.literal("era")
+                .then(Commands.literal("era")
                     .executes(context-> {
-                        context.getSource().sendFeedback(() -> Text.literal("Te encuentras en la era " + eraActual), false);
+                        context.getSource().sendSuccess( () -> Component.literal("Te encuentras en la era " + eraActual),
+                            false
+                        );
                         return 1;
                     })
                 )
@@ -163,11 +204,11 @@ public class MictlanMod implements ModInitializer {
                 * -----------------------------------------------------------------
                 */                
 
-                .then(CommandManager.literal("home")
-                    .then(CommandManager.literal("set")
+                .then(Commands.literal("home")
+                    .then(Commands.literal("set")
                         .executes(context -> {
                             HelpersComandos helpersComandos = new HelpersComandos();
-                            helpersComandos.marcarNuevaUbicacionNPC(context, new Identifier(ConfiguracionNPC.xolotlNPCIdentifier));
+                            helpersComandos.marcarNuevaUbicacionNPC(context, new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier));
                             return 1;
                         })
                     )
@@ -179,7 +220,7 @@ public class MictlanMod implements ModInitializer {
                 * -----------------------------------------------------------------
                 */
 
-                .then(CommandManager.literal("home")
+                .then(Commands.literal("home")
                     .executes(context ->{
                         commandExecuted++;
                         if(commandExecuted % 2 != 0) {
@@ -187,7 +228,7 @@ public class MictlanMod implements ModInitializer {
                         } else {
                             HelpersComandos.segundaEsquina(context);
                             LOGGER.info("[Mictlan] " + HelpersComandos.totalChunkPosCount);
-                            context.getSource().sendFeedback(() -> Text.literal("Tu casa se ha guardado exitosamente"), false);
+                            context.getSource().sendSuccess(() -> Component.literal("Tu casa se ha guardado exitosamente"), false);
                             for(ChunkPos chunks : HelpersComandos.totalChunkPosCount){
                                 HelpersComandos.guardarCasaEnDisco(context, chunks);
                                 CurrentEra.homeChunkPasted(true);
@@ -204,11 +245,11 @@ public class MictlanMod implements ModInitializer {
                  * -----------------------------------------------------------------
                  */
 
-                .then(CommandManager.literal("home")
-                    .then(CommandManager.literal("clear")
+                .then(Commands.literal("home")
+                    .then(Commands.literal("clear")
                         .executes(context -> {
                             HelpersComandos.borrarDatosCargados();
-                            context.getSource().sendFeedback(() -> Text.literal("Los Chunks guardados han sido borrados exitosamente"), false);
+                            context.getSource().sendSuccess(() -> Component.literal("Los Chunks guardados han sido borrados exitosamente"), false);
 
                             return 1;
                         })
@@ -221,31 +262,30 @@ public class MictlanMod implements ModInitializer {
                  * -----------------------------------------------------------------
                  */
                           
-                .then(CommandManager.literal("faccion")
-                    .then(CommandManager.literal("Pueblos")
+                .then(Commands.literal("faccion")
+                    .then(Commands.literal("Pueblos")
                         .executes(context -> {
                             reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Pueblos");
-                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion con la faccion de los pueblos es: " + reputacionFaccion), false);
+                            context.getSource().sendSuccess(() -> Component.literal("Tu reputacion con la faccion de los pueblos es: " + reputacionFaccion), false);
                             return 1;
                         })
                     )
-                    .then(CommandManager.literal("Aquelarre")
+                    .then(Commands.literal("Aquelarre")
                         .executes(context -> {
                             reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Aquelarre");
-                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion con la faccion del aquelarre es: " + reputacionFaccion), false);
+                            context.getSource().sendSuccess(() -> Component.literal("Tu reputacion con la faccion del aquelarre es: " + reputacionFaccion), false);
                             return 1;
                         })
                     )
-                    .then(CommandManager.literal("Mictlan")
+                    .then(Commands.literal("Mictlan")
                         .executes(context -> {
                             reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Mictlan");
-                            context.getSource().sendFeedback(() -> Text.literal("Tu reputacion en Mictlan es: " + reputacionFaccion), false);
+                            context.getSource().sendSuccess(() -> Component.literal("Tu reputacion en Mictlan es: " + reputacionFaccion), false);
                             return 1;
                         })
                     )
                 )
                 
             );
-        });
-    };
+        }
 } 

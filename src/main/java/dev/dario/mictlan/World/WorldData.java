@@ -1,6 +1,6 @@
 package dev.dario.mictlan.World;
 
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.level.ChunkPos;
 
 /**
  * Clase para almacenar los datos de una era del mundo: su nombre y la zona

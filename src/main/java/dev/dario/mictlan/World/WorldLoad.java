@@ -2,15 +2,15 @@ package dev.dario.mictlan.World;
 
 import java.io.IOException;
 
-import net.minecraft.util.WorldSavePath;
-import net.minecraft.world.World;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Path;
 
 import dev.dario.mictlan.Core.MictlanMod;
 import dev.dario.mictlan.Helpers.Helpers;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+
 import java.nio.file.Files;
 
 
@@ -32,18 +32,18 @@ public class WorldLoad {
     * -------------------------------------------------------------------------
     */
 
-    public static void worldLoad(MinecraftServer servidor, ServerWorld mundo, WorldData CurrentEra){
+    public static void worldLoad(MinecraftServer servidor, ServerLevel mundo, WorldData CurrentEra){
         // LOAD corre una vez por dimension; solo nos interesa el Overworld.
-        if(mundo.getRegistryKey() == World.OVERWORLD){
+        if(mundo.dimension() == ServerLevel.OVERWORLD){
             WorldData respuestaArchivoDeConfiguracion;
-            mictlanConfigDir = (FabricLoader.getInstance().getConfigDir().resolve("mictlan"));
+            mictlanConfigDir = (FMLPaths.CONFIGDIR.get().resolve("mictlan"));
             mictlanConfigFile = Path.of(mictlanConfigDir.toString(), "mictlan.json" );
-            mictlanDir = servidor.getSavePath(WorldSavePath.ROOT).resolve("mictlan");
+            mictlanDir = servidor.getWorldPath(LevelResource.ROOT).resolve("mictlan");
             characterDir = mictlanDir.resolve("character");
             playerDir = mictlanDir.resolve("players");
             worldData = mictlanDir.resolve("world");
             // Fuera del save del mundo para que sobreviva al cambiar de mundo.
-            mictlanCorePath = FabricLoader.getInstance().getGameDir().resolve("mictlan");
+            mictlanCorePath = FMLPaths.CONFIGDIR.get().resolve("mictlan");
             mictlanCoreDataPath = mictlanCorePath.resolve("data");
             mictlanCoreEntitiesPath = mictlanCorePath.resolve("entities");
 
