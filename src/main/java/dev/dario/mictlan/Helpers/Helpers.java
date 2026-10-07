@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Helpers;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -15,7 +15,9 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.Optional;
 
+import dev.dario.mictlan.Core.MictlanMod;
 import dev.dario.mictlan.Players.PlayerConnection;
+import dev.dario.mictlan.World.WorldData;
 import net.minecraft.entity.Entity;
 
 

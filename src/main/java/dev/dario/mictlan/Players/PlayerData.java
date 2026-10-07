@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Players;
 
 import java.util.HashMap;
 

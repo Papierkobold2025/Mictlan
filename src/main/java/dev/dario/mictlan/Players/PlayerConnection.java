@@ -9,10 +9,10 @@ import java.util.Optional;
 
 import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
-import dev.dario.mictlan.ConfiguracionNPC;
-import dev.dario.mictlan.Helpers;
-import dev.dario.mictlan.MictlanMod;
-import dev.dario.mictlan.WorldLoad;
+import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.Helpers.Helpers;
+import dev.dario.mictlan.NPC.ConfiguracionNPC;
+import dev.dario.mictlan.World.WorldLoad;
 
 import java.nio.file.Files;
 import net.minecraft.text.Text;

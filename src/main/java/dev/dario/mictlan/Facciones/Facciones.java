@@ -2,6 +2,7 @@ package dev.dario.mictlan.Facciones;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ import net.minecraft.util.Identifier;
 
 public class Facciones {
     private Identifier rutaPueblos = new Identifier("mictlan_medieval", "facciones/pueblos.json");
-    private List<Optional<Resource>> archivosFacciones; 
+    private List<Optional<Resource>> archivosFacciones = new ArrayList<>(); 
     private String nombre;
     private HashMap<String, Integer> matar = new HashMap<>();
     private Facciones facciones;
@@ -42,5 +43,8 @@ public class Facciones {
         if(reputacionFaccion.containsKey(facciones.nombre)){
             faccionPueblos.cambioReputacion(jugador, reputacionFaccion);
         }
+    }
+    public HashMap<String, Integer> isReputacionFaccion() {
+        return this.reputacionFaccion;
     }
 }

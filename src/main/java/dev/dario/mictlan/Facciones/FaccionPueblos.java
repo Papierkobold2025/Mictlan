@@ -7,6 +7,5 @@ import net.minecraft.entity.Entity;
 public class FaccionPueblos {
     public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion) {
 
-
     }
 }
