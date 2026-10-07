@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Entity;
 
 public class FaccionPueblos {
     public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion) {
-        Integer reputacion = reputacionDeFaccion.get("Pueblos");
+        Integer reputacion = reputacionDeFaccion.get("Los Pueblos");
         if(reputacion <= 10 && reputacion >= -10) {
 
         } else if (reputacion <= 25) {
