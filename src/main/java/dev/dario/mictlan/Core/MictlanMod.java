@@ -166,7 +166,7 @@ public class MictlanMod {
             HashMap<String, Integer> reputacionDeJugador = new HashMap<>();
             if(event.getEntity() instanceof ServerPlayer jugador) {
                 if(facciones.isReputacionFaccion().isEmpty()) {
-                    reputacionDeJugador.put("Pueblos", 0);
+                    reputacionDeJugador.put("Los Pueblos", 0);
                     faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
                 } else {
                     faccionPueblos.cambioReputacion(jugador, facciones.isReputacionFaccion());
@@ -265,14 +265,14 @@ public class MictlanMod {
                 .then(Commands.literal("faccion")
                     .then(Commands.literal("Pueblos")
                         .executes(context -> {
-                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Pueblos");
+                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Los Pueblos");
                             context.getSource().sendSuccess(() -> Component.literal("Tu reputacion con la faccion de los pueblos es: " + reputacionFaccion), false);
                             return 1;
                         })
                     )
                     .then(Commands.literal("Aquelarre")
                         .executes(context -> {
-                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "Aquelarre");
+                            reputacionFaccion = HelpersComandos.leerReputacionPorFaccion(context, "El Aquelarre");
                             context.getSource().sendSuccess(() -> Component.literal("Tu reputacion con la faccion del aquelarre es: " + reputacionFaccion), false);
                             return 1;
                         })
