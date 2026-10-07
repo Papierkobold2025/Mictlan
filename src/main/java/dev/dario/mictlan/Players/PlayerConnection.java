@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Players;
 
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -9,6 +9,10 @@ import java.util.Optional;
 
 import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+import dev.dario.mictlan.ConfiguracionNPC;
+import dev.dario.mictlan.Helpers;
+import dev.dario.mictlan.MictlanMod;
+import dev.dario.mictlan.WorldLoad;
 
 import java.nio.file.Files;
 import net.minecraft.text.Text;

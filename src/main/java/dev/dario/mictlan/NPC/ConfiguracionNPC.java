@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.NPC;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +18,8 @@ import de.markusbordihn.easynpc.data.action.MessageActionData;
 import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
+import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.Players.PlayerConnection;
 import net.minecraft.resource.Resource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;

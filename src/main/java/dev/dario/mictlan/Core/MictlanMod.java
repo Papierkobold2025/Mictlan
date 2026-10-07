@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Core;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -17,6 +17,15 @@ import net.minecraft.util.Identifier;
 import com.google.gson.Gson;
 
 import de.markusbordihn.easynpc.api.action.ActionRegistry;
+import dev.dario.mictlan.Facciones.Facciones;
+import dev.dario.mictlan.Helpers.Helpers;
+import dev.dario.mictlan.Helpers.HelpersComandos;
+import dev.dario.mictlan.NPC.ConfiguracionNPC;
+import dev.dario.mictlan.Players.PlayerConnection;
+import dev.dario.mictlan.Players.PlayerData;
+import dev.dario.mictlan.Players.PlayerDisconnection;
+import dev.dario.mictlan.World.WorldData;
+import dev.dario.mictlan.World.WorldLoad;
 
 /**
  * Punto de entrada del mod. Registra eventos de mundo, conexion de

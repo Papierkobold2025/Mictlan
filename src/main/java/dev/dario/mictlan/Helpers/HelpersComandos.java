@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Helpers;
 
 import java.io.IOException;
 
@@ -28,6 +28,11 @@ import de.markusbordihn.easynpc.data.objective.ObjectiveType;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import de.markusbordihn.easynpc.handler.ObjectiveHandler;
+import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.NPC.ConfiguracionNPC;
+import dev.dario.mictlan.Players.PlayerConnection;
+import dev.dario.mictlan.World.WorldData;
+import dev.dario.mictlan.World.WorldLoad;
 
 import java.util.Optional;
 import java.util.UUID;

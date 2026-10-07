@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Facciones;
 
 import java.util.HashMap;
 

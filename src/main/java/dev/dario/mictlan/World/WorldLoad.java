@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.World;
 
 import java.io.IOException;
 
@@ -7,6 +7,9 @@ import net.minecraft.world.World;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.world.ServerWorld;
 import java.nio.file.Path;
+
+import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.Helpers.Helpers;
 import net.minecraft.server.MinecraftServer;
 import java.nio.file.Files;
 

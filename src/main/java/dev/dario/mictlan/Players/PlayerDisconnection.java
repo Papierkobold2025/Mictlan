@@ -1,8 +1,10 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Players;
 
 import java.nio.file.Path;
 import java.util.HashMap;
 
+import dev.dario.mictlan.Helpers;
+import dev.dario.mictlan.WorldLoad;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 

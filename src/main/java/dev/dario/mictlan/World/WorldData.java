@@ -1,4 +1,4 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.World;
 
 import net.minecraft.util.math.ChunkPos;
 

@@ -1,7 +1,9 @@
-package dev.dario.mictlan;
+package dev.dario.mictlan.Facciones;
 
 import java.util.HashMap;
 
+import dev.dario.mictlan.Helpers.Helpers;
+import dev.dario.mictlan.Players.PlayerConnection;
 import net.minecraft.entity.Entity;
 
 public class ConfiguracionReputacion {
