@@ -21,7 +21,7 @@ public class PlayerData {
     /** Indica en que era se encuentra el jugador */
     private String era;
 
-    private HashMap<String, Integer> statisticPlayers;
+    private HashMap<String, Integer> statisticPlayers = new HashMap<>();
 
     /** Crea un registro nuevo asociado al UUID indicado. */
     public PlayerData(String playerUUID) {

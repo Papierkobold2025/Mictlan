@@ -26,7 +26,7 @@ public class PlayerConnection {
     public static PlayerData playerData;
     public static Path playerFilePath;
     public static HashMap<String, PlayerData> connectedPlayers = new HashMap<>();
-    public static Optional<EasyNPC<?>> spawnXolotl;
+    public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayer> jugadoresDisponibles = new ArrayList<>();
     private static MutableComponent mictlanFormatting = Component.literal("Mictlan").withStyle(ChatFormatting.DARK_PURPLE);
@@ -47,10 +47,11 @@ public class PlayerConnection {
         // Xolotl aparece en el spawn la primera vez que alguien entra.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), playerHandler.getServer().overworld(), Vec3.atBottomCenterOf(playerHandler.getServer().overworld().getSharedSpawnPos()), null, null);
+            if(!spawnXolotl.isPresent()) {
+                MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
+            }
         }
-        if(!spawnXolotl.isPresent()) {
-            MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
-        }
+        
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
             Component welcomeMessage = Component.literal("Bienvenido a ").append(mictlanFormatting).append(Component.literal(playerName + "!"));
