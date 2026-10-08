@@ -2,6 +2,7 @@ package dev.dario.mictlan.NPC;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,7 @@ public class ConfiguracionNPC {
     private static Optional<Resource> rutaDialogosFile;
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
-    private static List<ActionDataEntry> mensajesXolotl;
+    private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
     private static Optional<EasyNPC<?>> easyNPCOptional;
 
     /**

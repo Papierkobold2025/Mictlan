@@ -26,6 +26,7 @@ public class Facciones {
     private ConfiguracionReputacion configuracionReputacion = new ConfiguracionReputacion();
     private HashMap<String, Integer> reputacionFaccion = new HashMap<>();
     public void configuracionFacciones(MinecraftServer servidor, Entity jugador, LivingEntity entidad) {
+        archivosFacciones.clear();
         archivosFacciones.add(servidor.getResourceManager().getResource(rutaPueblos));
         for(Optional<Resource> faccion : archivosFacciones){
             try (BufferedReader leerFacciones = faccion.get().openAsReader()) {
