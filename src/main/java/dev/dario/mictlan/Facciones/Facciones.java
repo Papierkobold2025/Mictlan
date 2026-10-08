@@ -45,7 +45,4 @@ public class Facciones {
             faccionPueblos.cambioReputacion(jugador, reputacionFaccion);
         }
     }
-    public HashMap<String, Integer> isReputacionFaccion() {
-        return this.reputacionFaccion;
-    }
 }

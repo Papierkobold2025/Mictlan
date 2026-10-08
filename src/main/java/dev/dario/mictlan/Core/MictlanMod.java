@@ -1,6 +1,8 @@
 package dev.dario.mictlan.Core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,8 @@ import net.minecraft.resources.ResourceLocation;
 import com.google.gson.Gson;
 
 import de.markusbordihn.easynpc.api.action.ActionRegistry;
+import dev.dario.mictlan.Facciones.FaccionAquelarre;
+import dev.dario.mictlan.Facciones.FaccionMictlan;
 import dev.dario.mictlan.Facciones.FaccionPueblos;
 import dev.dario.mictlan.Facciones.Facciones;
 import dev.dario.mictlan.Helpers.Helpers;
@@ -58,6 +62,8 @@ public class MictlanMod {
 
     public static int commandExecuted = 0;
 
+    List<String> listaFacciones = new ArrayList<>(List.of("Los Pueblos", "El Aquelarre", "Mictlan"));
+
     /**
      * -------------------------------------------------------------------------
      * DATOS DE LA ERA
@@ -73,6 +79,10 @@ public class MictlanMod {
     private Facciones facciones = new Facciones();
 
     private FaccionPueblos faccionPueblos = new FaccionPueblos();
+    
+    private FaccionAquelarre faccionAquelarre = new FaccionAquelarre();
+
+    private FaccionMictlan faccionMictlan = new FaccionMictlan();
 
     private Integer reputacionFaccion = 0;
 
@@ -164,12 +174,34 @@ public class MictlanMod {
 
         private void onVillagerTrade(TradeWithVillagerEvent event) {
             HashMap<String, Integer> reputacionDeJugador = new HashMap<>();
+            playerData = PlayerConnection.connectedPlayers.get(event.getEntity().getStringUUID());
+            HashMap<String, Integer> reputacion = playerData.isPlayerReputation();
             if(event.getEntity() instanceof ServerPlayer jugador) {
-                if(facciones.isReputacionFaccion().isEmpty()) {
-                    reputacionDeJugador.put("Los Pueblos", 0);
-                    faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
+                if(!reputacion.isEmpty()) {
+                    for(String facciones : listaFacciones) {
+                        switch (facciones) {
+                            case "Los Pueblos":
+                                faccionPueblos.cambioReputacion(jugador, reputacion);
+                                break;
+                            case "El Aquelarre":
+                                faccionAquelarre.cambioReputacion(jugador, reputacion);
+                                break;
+                            case "Mictlan":
+                                faccionMictlan.cambioReputacion(jugador, reputacion);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 } else {
-                    faccionPueblos.cambioReputacion(jugador, facciones.isReputacionFaccion());
+                    for(String facciones : listaFacciones) {
+                        if(!reputacion.containsKey(facciones)) {
+                            reputacionDeJugador.put(facciones, 0);
+                            faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
+                        } else {
+                            continue;
+                        }
+                    }
                 }
             }
         }
