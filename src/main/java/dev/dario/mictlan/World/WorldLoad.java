@@ -36,7 +36,7 @@ public class WorldLoad {
         // LOAD corre una vez por dimension; solo nos interesa el Overworld.
         if(mundo.dimension() == ServerLevel.OVERWORLD){
             WorldData respuestaArchivoDeConfiguracion;
-            mictlanConfigDir = (FMLPaths.CONFIGDIR.get().resolve("mictlan"));
+            mictlanConfigDir = (FMLPaths.GAMEDIR.get().resolve("mictlan"));
             mictlanConfigFile = Path.of(mictlanConfigDir.toString(), "mictlan.json" );
             mictlanDir = servidor.getWorldPath(LevelResource.ROOT).resolve("mictlan");
             characterDir = mictlanDir.resolve("character");

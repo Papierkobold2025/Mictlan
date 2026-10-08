@@ -1,6 +1,8 @@
 package dev.dario.mictlan.Players;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import java.nio.file.Path;
@@ -27,6 +29,7 @@ public class PlayerConnection {
     public static Optional<EasyNPC<?>> spawnXolotl;
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayer> jugadoresDisponibles = new ArrayList<>();
+    private static MutableComponent mictlanFormatting = Component.literal("Mictlan").withStyle(ChatFormatting.DARK_PURPLE);
 
     /**
     * -------------------------------------------------------------------------
@@ -43,12 +46,14 @@ public class PlayerConnection {
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
         // Xolotl aparece en el spawn la primera vez que alguien entra.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
-            MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), playerHandler.getServer().overworld(), Vec3.atBottomCenterOf(playerHandler.getServer().overworld().getSharedSpawnPos()), null, null);
+        }
+        if(!spawnXolotl.isPresent()) {
+            MictlanMod.LOGGER.info("[Mictlan] El NPC aun no se ha generado!");
         }
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
-            Component welcomeMessage = Component.literal("Bienvenido a Mictlan, " + playerName + "!");
+            Component welcomeMessage = Component.literal("Bienvenido a ").append(mictlanFormatting).append(Component.literal(playerName + "!"));
             playerHandler.sendSystemMessage(welcomeMessage, false);
             connectedPlayers.put(playerUUID, playerData);
             Helpers.escribirDatosDelJugador(playerUUID);
@@ -57,7 +62,7 @@ public class PlayerConnection {
             Helpers.leerDatosDelJugador(playerHandler);
             
             playerData = MictlanMod.gson.fromJson(playerDataJson, playerData.getClass());
-            Component welcomeBackMessage = Component.literal("Bienvenido de nuevo a Mictlan, " + playerName + "!");
+            Component welcomeBackMessage = Component.literal("Bienvenido de nuevo a ").append(mictlanFormatting).append(playerName + "!");
             playerHandler.sendSystemMessage(welcomeBackMessage, false);
             playerData.hasPlayedBefore(true);
             playerData.setEra(MictlanMod.eraActual);
@@ -68,7 +73,7 @@ public class PlayerConnection {
         if (!Files.exists(WorldLoad.mictlanConfigFile)) {
             Helpers.escribirDatosDeConfiguracion(WorldLoad.mictlanConfigFile, MictlanMod.CurrentEra);
         }
-        Component eraMessage = Component.literal("Te encuentras en la era " + MictlanMod.eraActual);
+        Component eraMessage = Component.literal("Te encuentras en la era ").append(Component.literal(MictlanMod.eraActual).withStyle(ChatFormatting.DARK_AQUA));
         playerHandler.sendSystemMessage(eraMessage, false);
 
         MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se conecto.");

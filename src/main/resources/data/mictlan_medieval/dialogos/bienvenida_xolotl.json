@@ -8,7 +8,7 @@
             },
             {
                 "tipo": "decir",
-                "valor": "Mi nombre es Xolotl, soy el acompañante del Mictlan, y vengo a acompañarlos!"
+                "valor": "Mi nombre es <gold>Xolotl<reset>, soy el acompañante del Mictlan, y vengo a acompañarlos!"
             },
             {
                 "tipo": "esperar",
@@ -16,7 +16,7 @@
             },
             {
                 "tipo": "decir",
-                "valor": "Ahora busquen una casa en este vasto mundo, cuando lleguen, escriban el comando '/mictlan home set' y yo ire a donde esten!"           
+                "valor": "Ahora busquen una casa en este vasto mundo, cuando lleguen, escriban el comando <red>'/mictlan home set' y yo ire a donde esten!</red>"           
             },
             {
                 "tipo": "esperar",
@@ -24,7 +24,7 @@
             },
             {
                 "tipo": "decir",
-                "valor": "Antes de que se me olvide, tengan este libro: "           
+                "valor": "Antes de que se me olvide, <green>tengan este libro: </green>"           
             },
             {
                 "tipo": "esperar",
