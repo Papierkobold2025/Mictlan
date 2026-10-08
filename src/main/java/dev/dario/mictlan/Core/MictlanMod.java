@@ -177,31 +177,11 @@ public class MictlanMod {
             playerData = PlayerConnection.connectedPlayers.get(event.getEntity().getStringUUID());
             HashMap<String, Integer> reputacion = playerData.isPlayerReputation();
             if(event.getEntity() instanceof ServerPlayer jugador) {
-                if(!reputacion.isEmpty()) {
-                    for(String facciones : listaFacciones) {
-                        switch (facciones) {
-                            case "Los Pueblos":
-                                faccionPueblos.cambioReputacion(jugador, reputacion);
-                                break;
-                            case "El Aquelarre":
-                                faccionAquelarre.cambioReputacion(jugador, reputacion);
-                                break;
-                            case "Mictlan":
-                                faccionMictlan.cambioReputacion(jugador, reputacion);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                if(reputacion.containsKey("Los Pueblos")) {
+                    faccionPueblos.cambioReputacion(jugador, reputacion);
                 } else {
-                    for(String facciones : listaFacciones) {
-                        if(!reputacion.containsKey(facciones)) {
-                            reputacionDeJugador.put(facciones, 0);
-                            faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
-                        } else {
-                            continue;
-                        }
-                    }
+                    reputacionDeJugador.put("Los Pueblos", 0);
+                    faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
                 }
             }
         }
