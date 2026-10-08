@@ -1,9 +1,9 @@
 {
   "nombre": "Los Pueblos",
   "matar": {
-    "minecraft:villager": -15,
-    "minecraft:iron_golem": -10,
-    "minecraft:wandering_trader": -10,
-    "guardvillagers:guard": -10
+    "minecraft:villager": -3,
+    "minecraft:iron_golem": -2,
+    "minecraft:wandering_trader": -1,
+    "guardvillagers:guard": -4
   }
 }
