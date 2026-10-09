@@ -19,15 +19,14 @@ public class FaccionPueblos {
         new Nivel(16, Integer.MAX_VALUE, "Excelente")
     );
     String nivel = "Sin nivel";
-    public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion, AbstractContainerMenu ofertaAldeano) {
-        Integer reputacion = reputacionDeFaccion.get("Los Pueblos");
-            for(Nivel n : niveles) {
-                if(reputacion >= n.minimo() && reputacion <= n.maximo) {
-                    nivel = n.nombre();
-                    break;
-                }
-                nivel = "Sin nivel";
+    public void calculoReputacion(AbstractContainerMenu ofertaAldeano, Integer reputacion) {
+        for(Nivel n : niveles) {
+            if(reputacion >= n.minimo() && reputacion <= n.maximo) {
+                nivel = n.nombre();
+            break;
             }
+            nivel = "Sin nivel";
+        }
         switch (nivel) {
             case "Bueno":
                 if(ofertaAldeano instanceof MerchantMenu merchantMenu) {
@@ -48,6 +47,17 @@ public class FaccionPueblos {
             default:
                 break;
         }
+    }
+    public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion, AbstractContainerMenu ofertaAldeano) {
+        Integer reputacion = 0;
+        if(reputacionDeFaccion.containsKey("Los Pueblos")){
+            reputacion = reputacionDeFaccion.get("Los Pueblos");
+            calculoReputacion(ofertaAldeano, reputacion);
+        } else {
+            reputacionDeFaccion.put("Los Pueblos", 0);
+            calculoReputacion(ofertaAldeano, reputacionDeFaccion.get("Los Pueblos"));
+        }
+
 
     }
 }
