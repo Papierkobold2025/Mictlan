@@ -178,10 +178,10 @@ public class MictlanMod {
             HashMap<String, Integer> reputacion = playerData.isPlayerReputation();
             if(event.getEntity() instanceof ServerPlayer jugador) {
                 if(reputacion.containsKey("Los Pueblos")) {
-                    faccionPueblos.cambioReputacion(jugador, reputacion);
+                    faccionPueblos.cambioReputacion(jugador, reputacion, event.getMerchantOffer());
                 } else {
                     reputacionDeJugador.put("Los Pueblos", 0);
-                    faccionPueblos.cambioReputacion(jugador, reputacionDeJugador);
+                    faccionPueblos.cambioReputacion(jugador, reputacion, event.getMerchantOffer());
                 }
             }
         }

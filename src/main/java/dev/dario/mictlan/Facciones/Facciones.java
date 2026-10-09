@@ -48,6 +48,7 @@ public class Facciones {
                 entidadMatada = EntityType.getKey(entidad.getType()).toString();
                 if (matar.containsKey(entidadMatada)) {
                     reputacionFaccion = configuracionReputacion.puntosDeReputacion(matar.get(entidadMatada), jugador, facciones.nombre);
+/**
                     switch (nombre) {
                         case "Los Pueblos":
                             faccionPueblos.cambioReputacion(jugador, reputacionFaccion);                    
@@ -60,6 +61,7 @@ public class Facciones {
                         default:
                             break;
                     }
+*/
                 }
             } else {
                 MictlanMod.LOGGER.error("[Mictlan] El archivo " + faccion + " esta vacio!");

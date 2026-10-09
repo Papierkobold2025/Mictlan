@@ -5,7 +5,6 @@ import java.util.HashMap;
 import net.minecraft.world.entity.Entity;
 
 public class FaccionMictlan {
-    Facciones facciones = new Facciones();
     public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion) {
         Integer reputacion = reputacionDeFaccion.get("Mictlan");
         if(reputacion <= 10 && reputacion >= -10) {

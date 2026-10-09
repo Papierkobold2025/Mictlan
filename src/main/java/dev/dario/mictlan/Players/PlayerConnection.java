@@ -37,7 +37,7 @@ public class PlayerConnection {
     * -------------------------------------------------------------------------
     */
 
-    public static void playerConnection(ServerPlayer handler){
+    public static PlayerData playerConnection(ServerPlayer handler){
         playerHandler = handler;
         String playerName = playerHandler.getGameProfile().getName();
         //jugadoresDisponibles.add(playerHandler);
@@ -78,5 +78,7 @@ public class PlayerConnection {
         playerHandler.sendSystemMessage(eraMessage, false);
 
         MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se conecto.");
+
+        return playerData;
     }
 }

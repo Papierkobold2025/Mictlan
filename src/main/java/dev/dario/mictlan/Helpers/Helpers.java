@@ -18,6 +18,7 @@ import java.util.Optional;
 import dev.dario.mictlan.Core.MictlanMod;
 import dev.dario.mictlan.Players.PlayerConnection;
 import dev.dario.mictlan.World.WorldData;
+import dev.dario.mictlan.World.WorldLoad;
 import net.minecraft.world.entity.Entity;
 
 
@@ -109,7 +110,7 @@ public class Helpers {
     
     public static void escribirDatosDelJugador(String playerUUID) {
         try{
-            Files.writeString(PlayerConnection.playerFilePath, MictlanMod.gson.toJson(PlayerConnection.connectedPlayers.get(playerUUID)));
+            Files.writeString(Path.of(WorldLoad.playerDir.toString(), playerUUID + ".json"), MictlanMod.gson.toJson(PlayerConnection.connectedPlayers.get(playerUUID)));
         } catch (Exception e) {
             MictlanMod.LOGGER.error("[Mictlan] Datos no escritos a disco!");
         }            
