@@ -34,6 +34,7 @@ import dev.dario.mictlan.Players.PlayerData;
 import dev.dario.mictlan.Players.PlayerDisconnection;
 import dev.dario.mictlan.World.WorldData;
 import dev.dario.mictlan.World.WorldLoad;
+import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -172,16 +173,16 @@ public class MictlanMod {
          * -------------------------------------------------------------------------
          */
 
-        private void onVillagerTrade(TradeWithVillagerEvent event) {
+        private void onVillagerTrade(PlayerContainerEvent.Open event) {
             HashMap<String, Integer> reputacionDeJugador = new HashMap<>();
             playerData = PlayerConnection.connectedPlayers.get(event.getEntity().getStringUUID());
             HashMap<String, Integer> reputacion = playerData.isPlayerReputation();
             if(event.getEntity() instanceof ServerPlayer jugador) {
                 if(reputacion.containsKey("Los Pueblos")) {
-                    faccionPueblos.cambioReputacion(jugador, reputacion, event.getMerchantOffer());
+                    faccionPueblos.cambioReputacion(jugador, reputacion, event.getContainer());
                 } else {
                     reputacionDeJugador.put("Los Pueblos", 0);
-                    faccionPueblos.cambioReputacion(jugador, reputacion, event.getMerchantOffer());
+                    faccionPueblos.cambioReputacion(jugador, reputacionDeJugador, event.getContainer());
                 }
             }
         }

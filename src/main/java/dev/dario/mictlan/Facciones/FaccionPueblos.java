@@ -4,34 +4,47 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 
 public class FaccionPueblos {
-    
+    MerchantOffers merchantOffers;
     record Nivel(int minimo, int maximo, String nombre) {}
     List<Nivel> niveles = List.of(
-        new Nivel(-20, -10, "Malo"),
+        new Nivel(Integer.MIN_VALUE, -5, "Malo"),
         new Nivel(-4, 5, "Neutral"),
         new Nivel(6, 15, "Bueno"),
-        new Nivel(16, 24, "Excelente")
+        new Nivel(16, Integer.MAX_VALUE, "Excelente")
     );
     String nivel = "Sin nivel";
-    public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion, MerchantOffer ofertaAldeano) {
+    public void cambioReputacion(Entity jugador, HashMap<String, Integer> reputacionDeFaccion, AbstractContainerMenu ofertaAldeano) {
         Integer reputacion = reputacionDeFaccion.get("Los Pueblos");
             for(Nivel n : niveles) {
-            if(reputacion >= n.minimo() && reputacion <= n.maximo) {
-                nivel = n.nombre();
-                break;
+                if(reputacion >= n.minimo() && reputacion <= n.maximo) {
+                    nivel = n.nombre();
+                    break;
+                }
+                nivel = "Sin nivel";
             }
-        }
         switch (nivel) {
             case "Bueno":
-                ofertaAldeano.addToSpecialPriceDiff(-3);
+                if(ofertaAldeano instanceof MerchantMenu merchantMenu) {
+                    merchantOffers = merchantMenu.getOffers();
+                    for(MerchantOffer offer : merchantOffers) {
+                        offer.addToSpecialPriceDiff(-3);
+                    }
+                }
                 break;
             case "Excelente":
-                ofertaAldeano.addToSpecialPriceDiff(-15);
+                if(ofertaAldeano instanceof MerchantMenu merchantMenu) {
+                    merchantOffers = merchantMenu.getOffers();
+                    for(MerchantOffer offer : merchantOffers) {
+                        offer.addToSpecialPriceDiff(-15);
+                    }
+                }
+            break;
             default:
                 break;
         }
