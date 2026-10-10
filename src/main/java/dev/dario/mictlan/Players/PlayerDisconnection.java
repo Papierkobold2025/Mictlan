@@ -27,11 +27,13 @@ public class PlayerDisconnection {
             return;
         }
             jugadorDesconectado = jugador;
+            // Deja los datos compartidos de PlayerConnection apuntando a este jugador.
             PlayerConnection.playerUUID = jugador.getGameProfile().getId().toString();
             PlayerConnection.playerFilePath = Path.of(
                 WorldLoad.playerDir.toString(), 
                 PlayerConnection.playerUUID +".json"
             );
+            // Guardar primero: escribirDatosDelJugador lee de connectedPlayers.
             Helpers.escribirDatosDelJugador(jugador.getStringUUID());
             PlayerConnection.connectedPlayers.remove(jugador.getStringUUID());
     }

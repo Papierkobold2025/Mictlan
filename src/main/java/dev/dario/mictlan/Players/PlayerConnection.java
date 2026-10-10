@@ -60,13 +60,13 @@ public class PlayerConnection {
         } else {
             // Jugador existente.
             Helpers.leerDatosDelJugador(playerHandler);
-            
+            // leerDatosDelJugador deja el JSON en playerDataJson.
             playerData = MictlanMod.gson.fromJson(playerDataJson, playerData.getClass());
             Component welcomeBackMessage = Component.literal("Bienvenido de nuevo a ").append(mictlanFormatting).append(playerName + "!");
             playerHandler.sendSystemMessage(welcomeBackMessage, false);
             playerData.hasPlayedBefore(true);
             playerData.setEra(MictlanMod.eraActual);
-            // Reintento del kit (p. ej. inventario lleno la vez anterior).
+            // Se registra como conectado y se guarda con los datos actualizados.
             connectedPlayers.put(playerUUID, playerData);
             Helpers.escribirDatosDelJugador(playerUUID);
         };

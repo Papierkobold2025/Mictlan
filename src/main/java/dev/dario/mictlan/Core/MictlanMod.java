@@ -177,10 +177,12 @@ public class MictlanMod {
             HashMap<String, Integer> reputacionDeJugador = new HashMap<>();
             playerData = PlayerConnection.connectedPlayers.get(event.getEntity().getStringUUID());
             HashMap<String, Integer> reputacion = playerData.isPlayerReputation();
+            // Se dispara con cualquier contenedor; FaccionPueblos solo actua si es un MerchantMenu.
             if(event.getEntity() instanceof ServerPlayer jugador) {
                 if(reputacion.containsKey("Los Pueblos")) {
                     faccionPueblos.cambioReputacion(jugador, reputacion, event.getContainer());
                 } else {
+                    // Mapa temporal: no se guarda en el PlayerData del jugador.
                     reputacionDeJugador.put("Los Pueblos", 0);
                     faccionPueblos.cambioReputacion(jugador, reputacionDeJugador, event.getContainer());
                 }
@@ -194,6 +196,7 @@ public class MictlanMod {
          */        
 
         private void offVillagerTrade(PlayerContainerEvent.Close event) {
+            // Quita el descuento para que no se acumule en el aldeano.
             faccionPueblos.reseteoReputacion(event.getEntity(), event.getContainer());
         }
 

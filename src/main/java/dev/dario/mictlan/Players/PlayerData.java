@@ -19,6 +19,7 @@ public class PlayerData {
     /** Indica en que era se encuentra el jugador */
     private String era;
 
+    /** Reputacion del jugador por faccion (por ejemplo: "Los Pueblos" -> 6). */
     private HashMap<String, Integer> statisticPlayers = new HashMap<>();
 
     /** Crea un registro nuevo asociado al UUID indicado. */
@@ -41,6 +42,7 @@ public class PlayerData {
         this.era = era;
     }
 
+    /** Reemplaza todo el mapa de reputacion por faccion. */
     public void playerReputation (HashMap<String, Integer> reputationStatistic) {
         this.statisticPlayers = reputationStatistic;
     }
@@ -65,6 +67,7 @@ public class PlayerData {
         return this.playerUUID;
     }
 
+    /** Devuelve el mapa de reputacion por faccion (el original, no una copia). */
     public HashMap<String, Integer> isPlayerReputation() {
         return this.statisticPlayers;
     }
