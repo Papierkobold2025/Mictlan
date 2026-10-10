@@ -62,6 +62,7 @@ public class HelpersComandos {
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
     public UUID uuidNPC;
     private static ConfiguracionNPC movimientoNPC;
+    private static boolean spawnXolotl;
 
     /**
     * -------------------------------------------------------------------------
@@ -138,6 +139,9 @@ public class HelpersComandos {
     public void marcarNuevaUbicacionNPC(CommandContext<CommandSourceStack> context, ResourceLocation identifier) {
         
         Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, identifier);
+        if(identifierYNPC == null) {
+            spawnXolotl = ConfiguracionNPC.xolotlSpawn(context.getSource().getPlayer());
+        }
         EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
         movimientoNPC = new ConfiguracionNPC(identifierYNPC);
         BlockPos nuevaPosition = context.getSource().getPlayer().blockPosition();

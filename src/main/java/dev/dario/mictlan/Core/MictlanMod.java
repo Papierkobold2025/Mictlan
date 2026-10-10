@@ -36,7 +36,6 @@ import dev.dario.mictlan.World.WorldData;
 import dev.dario.mictlan.World.WorldLoad;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -101,6 +100,7 @@ public class MictlanMod {
         MinecraftForge.EVENT_BUS.addListener(this::onPlayerConnect);
         MinecraftForge.EVENT_BUS.addListener(this::onWorldLoad);
         MinecraftForge.EVENT_BUS.addListener(this::onVillagerTrade);
+        MinecraftForge.EVENT_BUS.addListener(this::offVillagerTrade);
 
         LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
 
@@ -185,6 +185,16 @@ public class MictlanMod {
                     faccionPueblos.cambioReputacion(jugador, reputacionDeJugador, event.getContainer());
                 }
             }
+        }
+
+        /**
+         * -------------------------------------------------------------------------
+         * LOGICA DE FIN DE TRADEO CON ALDEANOS
+         * -------------------------------------------------------------------------
+         */        
+
+        private void offVillagerTrade(PlayerContainerEvent.Close event) {
+            faccionPueblos.reseteoReputacion(event.getEntity(), event.getContainer());
         }
 
         /**

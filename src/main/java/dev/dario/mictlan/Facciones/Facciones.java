@@ -20,7 +20,6 @@ public class Facciones {
     private ResourceLocation rutaAquelarre = new ResourceLocation("mictlan_medieval", "facciones/aquelarre.json");
     private ResourceLocation rutaMictlan = new ResourceLocation("mictlan_medieval", "facciones/mictlan.json");
     private List<Optional<Resource>> archivosFacciones = new ArrayList<>(); 
-    private HashMap<String, Integer> asesinar = new HashMap<>();
     private accionMatar facciones;
     private String entidadMatada;
     private FaccionPueblos faccionPueblos = new FaccionPueblos();
@@ -52,20 +51,6 @@ public class Facciones {
                 entidadMatada = EntityType.getKey(entidad.getType()).toString();
                 if (accion.matar.containsKey(entidadMatada)) {
                     reputacionFaccion = configuracionReputacion.puntosDeReputacion(accion.matar.get(entidadMatada), jugador, facciones.nombre);
-/**
-                    switch (nombre) {
-                        case "Los Pueblos":
-                            faccionPueblos.cambioReputacion(jugador, reputacionFaccion);                    
-                            break;
-                        case "El Aquelarre":
-                            faccionAquelarre.cambioReputacion(jugador, reputacionFaccion);
-                            break;
-                        case "Mictlan":
-                            faccionMictlan.cambioReputacion(jugador, reputacionFaccion);            
-                        default:
-                            break;
-                    }
-*/
                 }
             } else {
                 MictlanMod.LOGGER.error("[Mictlan] El archivo " + faccion + " esta vacio!");

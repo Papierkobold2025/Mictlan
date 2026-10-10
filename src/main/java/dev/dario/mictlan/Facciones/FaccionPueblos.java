@@ -60,4 +60,12 @@ public class FaccionPueblos {
 
 
     }
+    public void reseteoReputacion(Entity jugador, AbstractContainerMenu menuAbstracto) {
+        if(menuAbstracto instanceof MerchantMenu menu) {
+            MerchantOffers ofertas = menu.getOffers();
+            for(MerchantOffer oferta : ofertas) {
+                oferta.resetSpecialPriceDiff();
+            }
+        }
+    }
 }

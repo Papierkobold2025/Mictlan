@@ -21,8 +21,10 @@ import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import dev.dario.mictlan.Core.MictlanMod;
 import dev.dario.mictlan.Players.PlayerConnection;
+import dev.dario.mictlan.Players.PlayerData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,6 +45,30 @@ public class ConfiguracionNPC {
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
     private static Optional<EasyNPC<?>> easyNPCOptional;
+    private static boolean xolotlPresence;
+    public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
+
+    /**
+     * 
+     * SPAWNEO DE XOLOTL
+     * 
+     */
+
+    public static boolean xolotlSpawn(ServerPlayer handler) {
+        if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
+            spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
+                new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), 
+                handler.getServer().overworld(), 
+                Vec3.atBottomCenterOf(handler.getServer().overworld().getSharedSpawnPos()), 
+                null, null
+            );
+
+            if(spawnXolotl.isPresent()) {
+                xolotlPresence = true;
+            }
+        }
+        return xolotlPresence;
+    }
 
     /**
     * -------------------------------------------------------------------------
@@ -80,6 +106,8 @@ public class ConfiguracionNPC {
     }
 
     public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
+        PlayerData playerData;
+        Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
         jugadoresSaludados(jugador.getServer());
             messageContent = "Bienvenidos " + saludoAJugadores + "!";
             mensajesXolotl.add(
@@ -98,14 +126,21 @@ public class ConfiguracionNPC {
                 } else if ("comando".equals(guardarMensajes.get(i).tipo)){
                     mensajesXolotl.add(
                         new ActionDataEntry(
-                            ActionDataType.COMMAND, guardarMensajes.get(i).valor));
+                            ActionDataType.COMMAND, guardarMensajes.get(i).valor
+                        )
+                    );
                 }
             }
             EasyNPCActionHandler.schedule(npc, new ResourceLocation("mictlan", "saludo"), 60, mensajesXolotl);
+            for(String player : jugadoresDisponibles) {
+                playerData = PlayerConnection.connectedPlayers.get(player);
+                playerData.hasReceivedStarterKit(true);
+            }
             MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
             EasyNPCActionHandler.setState(
                 npc, new ResourceLocation("mictlan", "saludo_inicial"), 
-                StateEntry.of(true), jugador);
+                StateEntry.of(true), jugador
+            );
     }
 
     public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {   
@@ -166,12 +201,4 @@ public class ConfiguracionNPC {
         }
         return null;
     }
-
-    /**
-    * -------------------------------------------------------------------------
-    * GETTERS
-    * -------------------------------------------------------------------------
-    */
-
-
 }
