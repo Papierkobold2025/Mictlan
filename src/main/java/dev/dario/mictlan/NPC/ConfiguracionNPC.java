@@ -45,8 +45,9 @@ public class ConfiguracionNPC {
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
     private static Optional<EasyNPC<?>> easyNPCOptional;
-    private static boolean xolotlPresence;
+    private static Optional<EasyNPC<?>> xolotlPresence;
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
+    private EasyNPC<?> xolotlHome;
 
     /**
     * -------------------------------------------------------------------------
@@ -54,7 +55,7 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public static boolean xolotlSpawn(ServerPlayer handler) {
+    public static Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
         // Solo se crea si no hay ya un NPC con el identificador de Xolotl.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
@@ -65,7 +66,7 @@ public class ConfiguracionNPC {
             );
 
             if(spawnXolotl.isPresent()) {
-                xolotlPresence = true;
+                xolotlPresence = spawnXolotl;
             }
         }
         return xolotlPresence;
@@ -116,13 +117,18 @@ public class ConfiguracionNPC {
             messageContent = "Bienvenidos " + saludoAJugadores + "!";
             mensajesXolotl.add(
                 new ActionDataEntry(ActionDataType.MESSAGE, "")
-                    .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of(messageContent))));
+                    .withMessageActionData(
+                        MessageActionData.DEFAULT.withTexts(List.of(messageContent))
+                    )
+                );
             for(Integer i = 0; i < guardarMensajes.size(); i++) {
                 if("decir".equals(guardarMensajes.get(i).tipo)) {
                     mensajesXolotl.add(
                         new ActionDataEntry(ActionDataType.MESSAGE, "")
                             .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of(
-                                guardarMensajes.get(i).valor))));
+                                guardarMensajes.get(i).valor
+                            )))
+                        );
                 } else if ("esperar".equals(guardarMensajes.get(i).tipo)){
                     mensajesXolotl.add(
                         new ActionDataEntry(
@@ -147,6 +153,7 @@ public class ConfiguracionNPC {
                 npc, new ResourceLocation("mictlan", "saludo_inicial"), 
                 StateEntry.of(true), jugador
             );
+            EasyNPCEntityHandler.delete(npc);
     }
 
     /** Se llama al interactuar con Xolotl: lee los dialogos y saluda si aun no lo hizo. */
@@ -194,19 +201,12 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<CommandSourceStack> context, ResourceLocation npcAObtener) {
-        
-        Collection<SavedNPCEntityEntry> entidadNPC = EasyNPCEntityHandler.getByCustomIdentifier(npcAObtener);
-        for(SavedNPCEntityEntry datosNPC : entidadNPC) {
-            // Si hay varios con el mismo identificador, se queda el ultimo.
-            uuidNPC = datosNPC.entityUUID();
+    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<CommandSourceStack> context, ServerPlayer handler, ResourceLocation npcAObtener) {
+        xolotlHome = xolotlPresence(handler).get();
+        if(!(xolotlHome == null)) {
+            return xolotlPresence;
+        } else {
+            return null;
         }
-        easyNPCOptional = EasyNPCEntityHandler.find(uuidNPC, context.getSource().getLevel());
-        if(!easyNPCOptional.isEmpty()) {
-            if(isXolotlYaSeMudo() == false) {
-                return easyNPCOptional;
-            }
-        }
-        return null;
     }
 }

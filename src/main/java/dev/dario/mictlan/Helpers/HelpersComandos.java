@@ -14,19 +14,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.nio.file.Files;
 
 import com.mojang.brigadier.context.CommandContext;
 
-import de.markusbordihn.easynpc.api.action.EasyNPCActionHandler;
-import de.markusbordihn.easynpc.api.handler.EasyNPCMotionHandler;
 import net.minecraft.world.phys.AABB;
 import de.markusbordihn.easynpc.data.objective.ObjectiveDataEntry;
 import de.markusbordihn.easynpc.data.objective.ObjectiveType;
-import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import de.markusbordihn.easynpc.handler.ObjectiveHandler;
 import dev.dario.mictlan.Core.MictlanMod;
@@ -56,13 +52,10 @@ public class HelpersComandos {
     private static ServerPlayer player;
     public static ChunkPos chunk;
     public static ChunkPos firstChunk;
-    private static boolean npcFueMovido;
     public static ArrayList<Integer> homeChunksX = new ArrayList<>();
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
     public UUID uuidNPC;
-    private static ConfiguracionNPC movimientoNPC;
-    private static boolean spawnXolotl;
 
     /**
     * -------------------------------------------------------------------------
@@ -138,31 +131,20 @@ public class HelpersComandos {
 
     public void marcarNuevaUbicacionNPC(CommandContext<CommandSourceStack> context, ResourceLocation identifier) {
         
-        Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, identifier);
+        Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, context.getSource().getPlayer(), identifier);
         if(identifierYNPC == null) {
-            spawnXolotl = ConfiguracionNPC.xolotlSpawn(context.getSource().getPlayer());
+            MictlanMod.LOGGER.error("[Mictlan] Xolotl no ha podido moverse hacia la posicion nueva!");
+        } else{
+            context.getSource().sendSuccess(() -> Component.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
         }
         EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
-        movimientoNPC = new ConfiguracionNPC(identifierYNPC);
         BlockPos nuevaPosition = context.getSource().getPlayer().blockPosition();
-        EasyNPCActionHandler.setState(
-            identifierEasyNPC, 
-            identifier,
-            StateEntry.of(nuevaPosition.getX()),
-            context.getSource().getPlayer()
-        );
-        npcFueMovido = EasyNPCMotionHandler.snapTo(identifierEasyNPC, Vec3.atBottomCenterOf(nuevaPosition));
-        if(npcFueMovido) {
-            movimientoNPC.xolotlYaSeMudo(true);
-        } else {
-            MictlanMod.LOGGER.error(identifierYNPC.toString() + " no ha podido moverse hacia la posicion nueva!");
-        };
         identifierEasyNPC.getEasyNPCNavigationData().setHomePosition(nuevaPosition);
         ObjectiveHandler.addOrUpdateCustomObjective(
             identifierEasyNPC, 
             new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
         );
-        context.getSource().sendSuccess(() -> Component.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
+        
     } 
 
     /**

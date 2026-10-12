@@ -43,13 +43,6 @@ public class PlayerConnection {
         playerUUID = playerHandler.getGameProfile().getId().toString();
         playerData = new PlayerData(handler.getStringUUID());
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
-        // Xolotl aparece en el spawn la primera vez que alguien entra.
-        xolotlPresent = ConfiguracionNPC.xolotlSpawn(handler);
-        if(xolotlPresent == false) {
-            MictlanMod.LOGGER.error("[Mictlan] Xolotl no pudo ser generado!");
-        } else {
-            MictlanMod.LOGGER.info("[Mictlan] Xolotl ha sido spawneado");
-        }
         
         // Primera conexion.
         if (!Files.exists(playerFilePath)) {
