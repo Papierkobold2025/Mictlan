@@ -41,7 +41,7 @@ public class ConfiguracionNPC {
     private static Optional<Resource> rutaDialogosFile;
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
-    private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
+    private List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
     private static Optional<EasyNPC<?>> xolotlPresence = Optional.empty();
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     private EasyNPC<?> xolotlHome;
@@ -109,7 +109,7 @@ public class ConfiguracionNPC {
     }
 
     /** Arma la secuencia de acciones del saludo y la programa en el NPC. */
-    public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
+    public void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
         if(!(PlayerConnection.playerData.isHasReceivedStarterKit())) {
             npcInicial = npc;
             PlayerData playerData;
@@ -177,7 +177,7 @@ public class ConfiguracionNPC {
     }
 
     /** Se llama al interactuar con Xolotl: lee los dialogos y saluda si aun no lo hizo. */
-    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {
+    public void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {
         rutaDialogos = new ResourceLocation("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
         rutaDialogosFile = jugador.getServer().getResourceManager().getResource(rutaDialogos);
         try (BufferedReader leerDialogos = rutaDialogosFile.get().openAsReader()){
