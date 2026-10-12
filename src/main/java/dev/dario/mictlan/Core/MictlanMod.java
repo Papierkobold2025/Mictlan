@@ -323,7 +323,7 @@ public class MictlanMod {
 
                 .then(Commands.literal("reputacion")
                     .then(Commands.argument("jugador", EntityArgument.players())
-                        .then(Commands.argument("faccion", StringArgumentType.string()))
+                        .then(Commands.argument("faccion", StringArgumentType.string())
                             .then(Commands.literal("sumar")
                                 .then(Commands.argument("cantidad", IntegerArgumentType.integer())
                                     .executes(context -> {
@@ -334,17 +334,18 @@ public class MictlanMod {
                                     })
                                 )
                             )
-                        .then(Commands.literal("fijar")
-                            .then(Commands.argument("cantidad", IntegerArgumentType.integer())
-                                .executes(context -> {
-                                        String faccion = StringArgumentType.getString(context, "faccion");
-                                        int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                        reputacionFaccion = (configuracionReputacion.puntosDeReputacion(
-                                            reputacionFaccion, context.getSource().getPlayer(), faccion)).get(faccion);
-                                        context.getSource().sendSuccess(
-                                            () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
-                                        return 1;
-                                })
+                            .then(Commands.literal("fijar")
+                                .then(Commands.argument("cantidad", IntegerArgumentType.integer())
+                                    .executes(context -> {
+                                            String faccion = StringArgumentType.getString(context, "faccion");
+                                            int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
+                                            reputacionFaccion = (configuracionReputacion.puntosDeReputacion(
+                                                reputacionFaccion, context.getSource().getPlayer(), faccion)).get(faccion);
+                                            context.getSource().sendSuccess(
+                                                () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
+                                            return 1;
+                                    })
+                                )
                             )
                         )
                     )

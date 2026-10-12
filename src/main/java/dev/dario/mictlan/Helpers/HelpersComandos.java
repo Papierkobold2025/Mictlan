@@ -237,13 +237,20 @@ public class HelpersComandos {
         return puntosDeReputacion;
     }
 
-    public Integer ponerReputacionPorFaccion(CommandContext<CommandSourceStack> context, Integer reputacion, String faccion) {
+    public Integer sumarReputacionPorFaccion(CommandContext<CommandSourceStack> context, Integer reputacion, String faccion) {
         Integer puntosDeReputacion = reputacion;
         HashMap<String, Integer> reputacionDelJugador = PlayerConnection.connectedPlayers.get(context.getSource().getPlayer().getStringUUID()).isPlayerReputation();
         if(reputacionDelJugador.containsKey(faccion)) {
-            puntosDeReputacion =+ reputacionDelJugador.get(faccion);
+            puntosDeReputacion += reputacionDelJugador.get(faccion);
             configuracionReputacion.puntosDeReputacion(puntosDeReputacion, context.getSource().getPlayer(), faccion).get(faccion);
         } 
+        return puntosDeReputacion;
+    }
+
+    public Integer ponerReputacionPorFaccion(CommandContext<CommandSourceStack> context, Integer reputacion, String faccion) {
+        Integer puntosDeReputacion = reputacion;
+        configuracionReputacion.reputacion = puntosDeReputacion;
+        configuracionReputacion.puntosDeReputacion(0, player, faccion);
         return puntosDeReputacion;
     }
 }
