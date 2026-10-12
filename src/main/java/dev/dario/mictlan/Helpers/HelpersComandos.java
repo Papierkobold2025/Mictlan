@@ -40,7 +40,6 @@ import java.nio.file.Path;
 
 public class HelpersComandos {
     private static ChunkPos secondChunk;
-    private static Path worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
     private static String worldChunkData = "";
     private static WorldData  worldChunkDataReturn;
     private static Path mictlanCoreDataFile;
@@ -82,6 +81,7 @@ public class HelpersComandos {
 
     public static void segundaEsquina(CommandContext<CommandSourceStack> context) {
         player = context.getSource().getPlayer();
+        Path worldDataChunks = Path.of(WorldLoad.worldData.toString(), MictlanMod.eraActual + ".json");
         chunk = player.chunkPosition();
         secondChunk = chunk;
         MictlanMod.CurrentEra.mictlanHomeChunks(secondChunk, firstChunk);
