@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
  */
 public class ConfiguracionReputacion {
     /** Reputacion final de la faccion despues de aplicar los puntos. */
-    private Integer reputacion = 0;
+    public Integer reputacion = 0;
 
     /** Mapa "faccion -> reputacion" del jugador (referencia al de su PlayerData). */
     private HashMap<String, Integer> hashMapReputacionPorFaccion = new HashMap<>();

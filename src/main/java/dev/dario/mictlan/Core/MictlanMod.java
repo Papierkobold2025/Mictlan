@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,8 +22,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraft.resources.ResourceLocation;
 
 import com.google.gson.Gson;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 
 import de.markusbordihn.easynpc.api.action.ActionRegistry;
+import dev.dario.mictlan.Facciones.ConfiguracionReputacion;
 import dev.dario.mictlan.Facciones.FaccionAquelarre;
 import dev.dario.mictlan.Facciones.FaccionMictlan;
 import dev.dario.mictlan.Facciones.FaccionPueblos;
@@ -85,6 +90,10 @@ public class MictlanMod {
     private FaccionMictlan faccionMictlan = new FaccionMictlan();
 
     private Integer reputacionFaccion = 0;
+
+    ConfiguracionReputacion configuracionReputacion;
+
+    HelpersComandos helpersComandos;
 
     /**
      * -------------------------------------------------------------------------
@@ -311,7 +320,35 @@ public class MictlanMod {
                         })
                     )
                 )
-                
+
+                .then(Commands.literal("reputacion")
+                    .then(Commands.argument("jugador", EntityArgument.players())
+                        .then(Commands.argument("faccion", StringArgumentType.string()))
+                            .then(Commands.literal("sumar")
+                                .then(Commands.argument("cantidad", IntegerArgumentType.integer())
+                                    .executes(context -> {
+                                        String faccion = StringArgumentType.getString(context, "faccion");
+                                        int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
+                                        reputacionFaccion = helpersComandos.ponerReputacionPorFaccion(context, reputacion, faccion);
+                                        return 1;
+                                    })
+                                )
+                            )
+                        .then(Commands.literal("fijar")
+                            .then(Commands.argument("cantidad", IntegerArgumentType.integer())
+                                .executes(context -> {
+                                        String faccion = StringArgumentType.getString(context, "faccion");
+                                        int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
+                                        reputacionFaccion = (configuracionReputacion.puntosDeReputacion(
+                                            reputacionFaccion, context.getSource().getPlayer(), faccion)).get(faccion);
+                                        context.getSource().sendSuccess(
+                                            () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
+                                        return 1;
+                                })
+                            )
+                        )
+                    )
+                )                
             );
         }
 } 

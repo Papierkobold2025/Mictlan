@@ -26,6 +26,7 @@ import de.markusbordihn.easynpc.data.objective.ObjectiveType;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import de.markusbordihn.easynpc.handler.ObjectiveHandler;
 import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.Facciones.ConfiguracionReputacion;
 import dev.dario.mictlan.NPC.ConfiguracionNPC;
 import dev.dario.mictlan.Players.PlayerConnection;
 import dev.dario.mictlan.World.WorldData;
@@ -56,6 +57,7 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
     public UUID uuidNPC;
+    public ConfiguracionReputacion configuracionReputacion;
 
     /**
     * -------------------------------------------------------------------------
@@ -137,14 +139,18 @@ public class HelpersComandos {
         } else{
             context.getSource().sendSuccess(() -> Component.literal("Xolotl ha emprendido su viaje y pronto estara contigo!"), false);
         }
-        EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
-        BlockPos nuevaPosition = context.getSource().getPlayer().blockPosition();
-        identifierEasyNPC.getEasyNPCNavigationData().setHomePosition(nuevaPosition);
-        ObjectiveHandler.addOrUpdateCustomObjective(
-            identifierEasyNPC, 
-            new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
-        );
-        
+        if(identifierYNPC.isPresent()){
+            EasyNPC<?> identifierEasyNPC = identifierYNPC.get();
+            
+            BlockPos nuevaPosition = context.getSource().getPlayer().blockPosition();
+            identifierEasyNPC.getEasyNPCNavigationData().setHomePosition(nuevaPosition);
+            ObjectiveHandler.addOrUpdateCustomObjective(
+                identifierEasyNPC, 
+                new ObjectiveDataEntry(ObjectiveType.RANDOM_STROLL_AROUND_HOME)
+            );
+        } else {
+            MictlanMod.LOGGER.error("[Mictlan] NPC no encontrado.");
+        }
     } 
 
     /**
@@ -227,6 +233,16 @@ public class HelpersComandos {
         if(reputacionDelJugador.containsKey(faccion)) {
             puntosDeReputacion = 0;
             puntosDeReputacion = reputacionDelJugador.get(faccion);
+        } 
+        return puntosDeReputacion;
+    }
+
+    public Integer ponerReputacionPorFaccion(CommandContext<CommandSourceStack> context, Integer reputacion, String faccion) {
+        Integer puntosDeReputacion = reputacion;
+        HashMap<String, Integer> reputacionDelJugador = PlayerConnection.connectedPlayers.get(context.getSource().getPlayer().getStringUUID()).isPlayerReputation();
+        if(reputacionDelJugador.containsKey(faccion)) {
+            puntosDeReputacion =+ reputacionDelJugador.get(faccion);
+            configuracionReputacion.puntosDeReputacion(puntosDeReputacion, context.getSource().getPlayer(), faccion).get(faccion);
         } 
         return puntosDeReputacion;
     }
