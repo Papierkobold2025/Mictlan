@@ -33,7 +33,6 @@ public class ConfiguracionNPC {
     public static StateEntry saludoInicial;
     private static String saludoAJugadores = "";
     private Optional<EasyNPC<?>> getNPC;
-    private UUID uuidNPC;
     private boolean xolotlSeMudo;
     public static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
@@ -44,10 +43,11 @@ public class ConfiguracionNPC {
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
-    private static Optional<EasyNPC<?>> easyNPCOptional;
-    private static Optional<EasyNPC<?>> xolotlPresence;
+    private Optional<EasyNPC<?>> xolotlPresence;
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     private EasyNPC<?> xolotlHome;
+    public static EasyNPC<?> npcInicial;
+    private static boolean borrado;
 
     /**
     * -------------------------------------------------------------------------
@@ -55,7 +55,7 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public static Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
+    public Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
         // Solo se crea si no hay ya un NPC con el identificador de Xolotl.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
@@ -111,6 +111,7 @@ public class ConfiguracionNPC {
 
     /** Arma la secuencia de acciones del saludo y la programa en el NPC. */
     public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
+        npcInicial = npc;
         PlayerData playerData;
         Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
         jugadoresSaludados(jugador.getServer());
@@ -153,7 +154,22 @@ public class ConfiguracionNPC {
                 npc, new ResourceLocation("mictlan", "saludo_inicial"), 
                 StateEntry.of(true), jugador
             );
-            EasyNPCEntityHandler.delete(npc);
+    }
+
+    /**
+     * 
+     * BORRAR NPC ACTUAL
+     * 
+     */
+
+    public boolean npcBorrado(Optional<EasyNPC<?>> npc) {
+        if(npc != null) {
+            borrado = EasyNPCEntityHandler.delete(npc.get());
+            xolotlPresence = Optional.empty();
+        } else {
+            borrado = false;
+        }
+        return borrado;
     }
 
     /** Se llama al interactuar con Xolotl: lee los dialogos y saluda si aun no lo hizo. */
@@ -208,5 +224,15 @@ public class ConfiguracionNPC {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 
+     * GETTERS PARA FACILITAR INTERACCION CON NPC
+     * 
+     */
+
+    public Optional<EasyNPC<?>> isPresentXolotl() {
+        return this.xolotlPresence;
     }
 }

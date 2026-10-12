@@ -29,6 +29,7 @@ public class PlayerConnection {
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayer> jugadoresDisponibles = new ArrayList<>();
     private static MutableComponent mictlanFormatting = Component.literal("Mictlan").withStyle(ChatFormatting.DARK_PURPLE);
+    private static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
 
     /**
     * -------------------------------------------------------------------------
@@ -37,6 +38,7 @@ public class PlayerConnection {
     */
 
     public static PlayerData playerConnection(ServerPlayer handler){
+        xolotlPresent = (configuracionNPC.isPresentXolotl().isPresent());
         playerHandler = handler;
         String playerName = playerHandler.getGameProfile().getName();
         //jugadoresDisponibles.add(playerHandler);
@@ -68,6 +70,10 @@ public class PlayerConnection {
         }
         Component eraMessage = Component.literal("Te encuentras en la era ").append(Component.literal(MictlanMod.eraActual).withStyle(ChatFormatting.DARK_AQUA));
         playerHandler.sendSystemMessage(eraMessage, false);
+        
+        if(!xolotlPresent) {
+            configuracionNPC.xolotlPresence(handler);
+        }
 
         MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se conecto.");
 

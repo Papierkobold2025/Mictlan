@@ -56,6 +56,7 @@ public class HelpersComandos {
     public static ArrayList<Integer> homeChunksZ = new ArrayList<>();
     public static ArrayList<ChunkPos> totalChunkPosCount = new ArrayList<>();
     public UUID uuidNPC;
+    private ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
 
     /**
     * -------------------------------------------------------------------------
@@ -130,7 +131,7 @@ public class HelpersComandos {
     */
 
     public void marcarNuevaUbicacionNPC(CommandContext<CommandSourceStack> context, ResourceLocation identifier) {
-        
+        configuracionNPC.npcBorrado(configuracionNPC.isPresentXolotl());
         Optional<EasyNPC<?>> identifierYNPC= new ConfiguracionNPC(Optional.empty()).obtenerNPC(context, context.getSource().getPlayer(), identifier);
         if(identifierYNPC == null) {
             MictlanMod.LOGGER.error("[Mictlan] Xolotl no ha podido moverse hacia la posicion nueva!");
