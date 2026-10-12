@@ -91,9 +91,9 @@ public class MictlanMod {
 
     private Integer reputacionFaccion = 0;
 
-    ConfiguracionReputacion configuracionReputacion;
+    public ConfiguracionReputacion configuracionReputacion = new ConfiguracionReputacion();
 
-    HelpersComandos helpersComandos;
+    public HelpersComandos helpersComandos = new HelpersComandos();
 
     /**
      * -------------------------------------------------------------------------
@@ -329,7 +329,7 @@ public class MictlanMod {
                                     .executes(context -> {
                                         String faccion = StringArgumentType.getString(context, "faccion");
                                         int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                        reputacionFaccion = helpersComandos.ponerReputacionPorFaccion(context, reputacion, faccion);
+                                        reputacionFaccion = helpersComandos.sumarReputacionPorFaccion(context, reputacion, faccion);
                                         return 1;
                                     })
                                 )
@@ -339,7 +339,7 @@ public class MictlanMod {
                                     .executes(context -> {
                                             String faccion = StringArgumentType.getString(context, "faccion");
                                             int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                            reputacionFaccion = (helpersComandos.ponerReputacionPorFaccion(context, reputacionFaccion, faccion));
+                                            reputacionFaccion = (helpersComandos.ponerReputacionPorFaccion(context, reputacion, faccion));
                                             context.getSource().sendSuccess(
                                                 () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
                                             return 1;

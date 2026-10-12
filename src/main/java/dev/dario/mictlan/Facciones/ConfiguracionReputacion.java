@@ -15,7 +15,7 @@ public class ConfiguracionReputacion {
     public Integer reputacion = 0;
 
     /** Mapa "faccion -> reputacion" del jugador (referencia al de su PlayerData). */
-    private HashMap<String, Integer> hashMapReputacionPorFaccion = new HashMap<>();
+    public HashMap<String, Integer> hashMapReputacionPorFaccion = new HashMap<>();
 
     /** UUID del jugador al que se le aplican los puntos. */
     private String playerEntity = "";
@@ -44,5 +44,11 @@ public class ConfiguracionReputacion {
         Helpers.escribirDatosDelJugador(playerEntity);
         reputacionResultante.put(faccion, reputacion);
         return reputacionResultante;
+    }
+
+    public void nuevosPuntosReputacion(Integer puntos, Entity jugador, String faccion) {
+        playerEntity = jugador.getStringUUID();
+        hashMapReputacionPorFaccion = PlayerConnection.connectedPlayers.get(playerEntity).isPlayerReputation();
+        hashMapReputacionPorFaccion.put(faccion, puntos);
     }
 }
