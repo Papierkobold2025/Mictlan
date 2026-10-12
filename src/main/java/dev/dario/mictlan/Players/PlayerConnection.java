@@ -29,7 +29,6 @@ public class PlayerConnection {
     public static String playerDataJson = "";
     public static ArrayList<ServerPlayer> jugadoresDisponibles = new ArrayList<>();
     private static MutableComponent mictlanFormatting = Component.literal("Mictlan").withStyle(ChatFormatting.DARK_PURPLE);
-    private static ConfiguracionNPC configuracionNPC = new ConfiguracionNPC(Optional.empty());
 
     /**
     * -------------------------------------------------------------------------
@@ -38,7 +37,7 @@ public class PlayerConnection {
     */
 
     public static PlayerData playerConnection(ServerPlayer handler){
-        xolotlPresent = (configuracionNPC.isPresentXolotl().isPresent());
+        xolotlPresent = (ConfiguracionNPC.isPresentXolotl().isPresent());
         playerHandler = handler;
         String playerName = playerHandler.getGameProfile().getName();
         //jugadoresDisponibles.add(playerHandler);
@@ -72,7 +71,7 @@ public class PlayerConnection {
         playerHandler.sendSystemMessage(eraMessage, false);
         
         if(!xolotlPresent) {
-            configuracionNPC.xolotlPresence(handler);
+            ConfiguracionNPC.xolotlPresence(handler);
         }
 
         MictlanMod.LOGGER.info("[Mictlan] " + playerName + " se conecto.");

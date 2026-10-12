@@ -3,7 +3,6 @@ package dev.dario.mictlan.NPC;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,7 +15,6 @@ import de.markusbordihn.easynpc.api.handler.EasyNPCEntityHandler;
 import de.markusbordihn.easynpc.data.action.ActionDataEntry;
 import de.markusbordihn.easynpc.data.action.ActionDataType;
 import de.markusbordihn.easynpc.data.action.MessageActionData;
-import de.markusbordihn.easynpc.data.npc.SavedNPCEntityEntry;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import dev.dario.mictlan.Core.MictlanMod;
@@ -43,7 +41,7 @@ public class ConfiguracionNPC {
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
-    private Optional<EasyNPC<?>> xolotlPresence;
+    private static Optional<EasyNPC<?>> xolotlPresence;
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     private EasyNPC<?> xolotlHome;
     public static EasyNPC<?> npcInicial;
@@ -55,7 +53,7 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
+    public static Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
         // Solo se crea si no hay ya un NPC con el identificador de Xolotl.
         if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
@@ -162,7 +160,7 @@ public class ConfiguracionNPC {
      * 
      */
 
-    public boolean npcBorrado(Optional<EasyNPC<?>> npc) {
+    public static boolean npcBorrado(Optional<EasyNPC<?>> npc) {
         if(npc != null) {
             borrado = EasyNPCEntityHandler.delete(npc.get());
             xolotlPresence = Optional.empty();
@@ -232,7 +230,7 @@ public class ConfiguracionNPC {
      * 
      */
 
-    public Optional<EasyNPC<?>> isPresentXolotl() {
-        return this.xolotlPresence;
+    public static Optional<EasyNPC<?>> isPresentXolotl() {
+        return xolotlPresence;
     }
 }
