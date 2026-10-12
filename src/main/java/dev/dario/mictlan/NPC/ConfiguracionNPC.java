@@ -59,7 +59,7 @@ public class ConfiguracionNPC {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
                 new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), 
                 handler.getServer().overworld(), 
-                Vec3.atBottomCenterOf(handler.getOnPos()), 
+                Vec3.atBottomCenterOf(handler.getOnPos().offset(5, 5, 1)), 
                 null, null
             );
 
