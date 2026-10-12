@@ -41,13 +41,13 @@ public class ConfiguracionNPC {
     private static Optional<Resource> rutaDialogosFile;
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
-    private List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
+    private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
     private static Optional<EasyNPC<?>> xolotlPresence = Optional.empty();
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     private EasyNPC<?> xolotlHome;
     public static EasyNPC<?> npcInicial;
     private static boolean borrado;
-
+    private PlayerConnection playerConnection;
     /**
     * -------------------------------------------------------------------------
     * SPAWNEO DE XOLOTL
@@ -109,8 +109,8 @@ public class ConfiguracionNPC {
     }
 
     /** Arma la secuencia de acciones del saludo y la programa en el NPC. */
-    public void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
-        if(!(PlayerConnection.playerData.isHasReceivedStarterKit())) {
+    public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
+        if(!(PlayerConnection.connectedPlayers.get(jugador.getStringUUID()).isHasReceivedStarterKit())) {
             npcInicial = npc;
             PlayerData playerData;
             Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
@@ -177,7 +177,7 @@ public class ConfiguracionNPC {
     }
 
     /** Se llama al interactuar con Xolotl: lee los dialogos y saluda si aun no lo hizo. */
-    public void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {
+    public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {
         rutaDialogos = new ResourceLocation("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
         rutaDialogosFile = jugador.getServer().getResourceManager().getResource(rutaDialogos);
         try (BufferedReader leerDialogos = rutaDialogosFile.get().openAsReader()){

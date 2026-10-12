@@ -86,7 +86,6 @@ public class MictlanMod {
 
     private Integer reputacionFaccion = 0;
 
-    private ConfiguracionNPC configuracionNPC;
     /**
      * -------------------------------------------------------------------------
      * INICIALIZACION DEL MOD
@@ -106,7 +105,7 @@ public class MictlanMod {
         LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
 
         ActionRegistry.register(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{    
-            configuracionNPC.interaccionXolotl(easyNPC, serverPlayer);
+            ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
         });
     }
 
