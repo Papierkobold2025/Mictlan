@@ -328,15 +328,22 @@ public class MictlanMod {
                     )
                 )
 
-                .then(Commands.literal("reputacion")
+                .then(Commands.literal("reputacion").requires(source -> source.hasPermission(2))
                     .then(Commands.argument("jugador", EntityArgument.players())
                         .then(Commands.argument("faccion", StringArgumentType.string())
+                            .suggests((context, builder) -> {
+                                builder.suggest("\"Los Pueblos\"");
+                                builder.suggest("\"El Aquelarre \"");
+                                builder.suggest("\"Mictlan\"");
+                                return builder.buildFuture();
+                            })
                             .then(Commands.literal("sumar")
                                 .then(Commands.argument("cantidad", IntegerArgumentType.integer())
                                     .executes(context -> {
                                         String faccion = StringArgumentType.getString(context, "faccion");
                                         int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                        reputacionFaccion = helpersComandos.sumarReputacionPorFaccion(context, reputacion, faccion);
+                                        ServerPlayer player = EntityArgument.getPlayer(context, "jugador");
+                                        reputacionFaccion = helpersComandos.sumarReputacionPorFaccion(player, reputacion, faccion);
                                         return 1;
                                     })
                                 )
@@ -346,7 +353,8 @@ public class MictlanMod {
                                     .executes(context -> {
                                             String faccion = StringArgumentType.getString(context, "faccion");
                                             int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                            reputacionFaccion = (helpersComandos.ponerReputacionPorFaccion(context, reputacion, faccion));
+                                            ServerPlayer player = EntityArgument.getPlayer(context, "jugador");
+                                            reputacionFaccion = (helpersComandos.ponerReputacionPorFaccion(player, reputacion, faccion));
                                             context.getSource().sendSuccess(
                                                 () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
                                             return 1;

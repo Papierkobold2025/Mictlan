@@ -50,5 +50,6 @@ public class ConfiguracionReputacion {
         playerEntity = jugador.getStringUUID();
         hashMapReputacionPorFaccion = PlayerConnection.connectedPlayers.get(playerEntity).isPlayerReputation();
         hashMapReputacionPorFaccion.put(faccion, puntos);
+        Helpers.escribirDatosDelJugador(playerEntity);
     }
 }
