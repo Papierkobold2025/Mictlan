@@ -18,6 +18,7 @@ import de.markusbordihn.easynpc.data.action.MessageActionData;
 import de.markusbordihn.easynpc.data.state.StateEntry;
 import de.markusbordihn.easynpc.entity.easynpc.EasyNPC;
 import dev.dario.mictlan.Core.MictlanMod;
+import dev.dario.mictlan.Helpers.Helpers;
 import dev.dario.mictlan.Players.PlayerConnection;
 import dev.dario.mictlan.Players.PlayerData;
 import net.minecraft.commands.CommandSourceStack;
@@ -109,49 +110,54 @@ public class ConfiguracionNPC {
 
     /** Arma la secuencia de acciones del saludo y la programa en el NPC. */
     public static void mensajesXolotl(EasyNPC<?> npc, List<DialogosXolotl> guardarMensajes, ServerPlayer jugador) {
-        npcInicial = npc;
-        PlayerData playerData;
-        Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
-        jugadoresSaludados(jugador.getServer());
-            messageContent = "Bienvenidos " + saludoAJugadores + "!";
-            mensajesXolotl.add(
-                new ActionDataEntry(ActionDataType.MESSAGE, "")
-                    .withMessageActionData(
-                        MessageActionData.DEFAULT.withTexts(List.of(messageContent))
-                    )
-                );
-            for(Integer i = 0; i < guardarMensajes.size(); i++) {
-                if("decir".equals(guardarMensajes.get(i).tipo)) {
-                    mensajesXolotl.add(
-                        new ActionDataEntry(ActionDataType.MESSAGE, "")
-                            .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of(
-                                guardarMensajes.get(i).valor
-                            )))
-                        );
-                } else if ("esperar".equals(guardarMensajes.get(i).tipo)){
-                    mensajesXolotl.add(
-                        new ActionDataEntry(
-                            ActionDataType.WAIT, guardarMensajes.get(i).valor));
-                } else if ("comando".equals(guardarMensajes.get(i).tipo)){
-                    mensajesXolotl.add(
-                        new ActionDataEntry(
-                            ActionDataType.COMMAND, guardarMensajes.get(i).valor
+        if(!(PlayerConnection.playerData.isHasReceivedStarterKit())) {
+            npcInicial = npc;
+            PlayerData playerData;
+            Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
+            jugadoresSaludados(jugador.getServer());
+                messageContent = "Bienvenidos " + saludoAJugadores + "!";
+                mensajesXolotl.add(
+                    new ActionDataEntry(ActionDataType.MESSAGE, "")
+                        .withMessageActionData(
+                            MessageActionData.DEFAULT.withTexts(List.of(messageContent))
                         )
                     );
+                for(Integer i = 0; i < guardarMensajes.size(); i++) {
+                    if("decir".equals(guardarMensajes.get(i).tipo)) {
+                        mensajesXolotl.add(
+                            new ActionDataEntry(ActionDataType.MESSAGE, "")
+                                .withMessageActionData(MessageActionData.DEFAULT.withTexts(List.of(
+                                    guardarMensajes.get(i).valor
+                                )))
+                            );
+                    } else if ("esperar".equals(guardarMensajes.get(i).tipo)){
+                        mensajesXolotl.add(
+                            new ActionDataEntry(
+                                ActionDataType.WAIT, guardarMensajes.get(i).valor));
+                    } else if ("comando".equals(guardarMensajes.get(i).tipo)){
+                        mensajesXolotl.add(
+                            new ActionDataEntry(
+                                ActionDataType.COMMAND, guardarMensajes.get(i).valor
+                            )
+                        );
+                    }
                 }
-            }
-            EasyNPCActionHandler.schedule(npc, new ResourceLocation("mictlan", "saludo"), 60, mensajesXolotl);
-            // Todos los jugadores conectados durante el saludo cuentan como que ya recibieron el kit.
-            for(String player : jugadoresDisponibles) {
-                playerData = PlayerConnection.connectedPlayers.get(player);
-                playerData.hasReceivedStarterKit(true);
-            }
-            MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
-            // Estado guardado en el propio NPC para no repetir el saludo.
-            EasyNPCActionHandler.setState(
-                npc, new ResourceLocation("mictlan", "saludo_inicial"), 
-                StateEntry.of(true), jugador
-            );
+                EasyNPCActionHandler.schedule(npc, new ResourceLocation("mictlan", "saludo"), 60, mensajesXolotl);
+                // Todos los jugadores conectados durante el saludo cuentan como que ya recibieron el kit.
+                for(String player : jugadoresDisponibles) {
+                    playerData = PlayerConnection.connectedPlayers.get(player);
+                    playerData.hasReceivedStarterKit(true);
+                }
+                MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
+                // Estado guardado en el propio NPC para no repetir el saludo.
+                EasyNPCActionHandler.setState(
+                    npc, new ResourceLocation("mictlan", "saludo_inicial"), 
+                    StateEntry.of(true), jugador
+                );
+                Helpers.escribirDatosDelJugador(jugador.getStringUUID());
+        } else {
+            MictlanMod.LOGGER.info("[Mictlan] Kit y bienvenida ya fueron entregados.");
+        }
     }
 
     /**
