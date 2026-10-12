@@ -339,8 +339,7 @@ public class MictlanMod {
                                     .executes(context -> {
                                             String faccion = StringArgumentType.getString(context, "faccion");
                                             int reputacion = IntegerArgumentType.getInteger(context, "cantidad");
-                                            reputacionFaccion = (configuracionReputacion.puntosDeReputacion(
-                                                reputacionFaccion, context.getSource().getPlayer(), faccion)).get(faccion);
+                                            reputacionFaccion = (helpersComandos.ponerReputacionPorFaccion(context, reputacionFaccion, faccion));
                                             context.getSource().sendSuccess(
                                                 () -> Component.literal("Reputacion fijada: " + reputacionFaccion), false);
                                             return 1;
