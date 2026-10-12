@@ -248,7 +248,6 @@ public class HelpersComandos {
 
     public Integer ponerReputacionPorFaccion(CommandContext<CommandSourceStack> context, Integer reputacion, String faccion) {
         Integer puntosDeReputacion = reputacion;
-        PlayerConnection.connectedPlayers.get(context.getSource().getPlayer().getStringUUID()).playerReputation(null);
         configuracionReputacion.nuevosPuntosReputacion(puntosDeReputacion, player, faccion);
         return puntosDeReputacion;
     }
