@@ -41,7 +41,7 @@ public class ConfiguracionNPC {
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
     private static List<ActionDataEntry> mensajesXolotl = new ArrayList<>();
-    private static Optional<EasyNPC<?>> xolotlPresence;
+    private static Optional<EasyNPC<?>> xolotlPresence = Optional.empty();
     public static Optional<EasyNPC<?>> spawnXolotl = Optional.empty();
     private EasyNPC<?> xolotlHome;
     public static EasyNPC<?> npcInicial;
@@ -59,7 +59,7 @@ public class ConfiguracionNPC {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
                 new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), 
                 handler.getServer().overworld(), 
-                Vec3.atBottomCenterOf(handler.getServer().overworld().getSharedSpawnPos()), 
+                Vec3.atBottomCenterOf(handler.getOnPos()), 
                 null, null
             );
 
