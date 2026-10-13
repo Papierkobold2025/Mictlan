@@ -241,8 +241,10 @@ public class HelpersComandos {
         Integer puntosDeReputacion = reputacion;
         HashMap<String, Integer> reputacionDelJugador = PlayerConnection.connectedPlayers.get(context.getStringUUID()).isPlayerReputation();
         if(reputacionDelJugador.containsKey(faccion)) {
-            configuracionReputacion.puntosDeReputacion(puntosDeReputacion, context, faccion).get(faccion);
-        } 
+            puntosDeReputacion = configuracionReputacion.puntosDeReputacion(puntosDeReputacion, context, faccion).get(faccion);
+        } else {
+            reputacionDelJugador.put(faccion, puntosDeReputacion);
+        }
         return puntosDeReputacion;
     }
 

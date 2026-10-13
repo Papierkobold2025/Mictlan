@@ -47,7 +47,6 @@ public class ConfiguracionNPC {
     private EasyNPC<?> xolotlHome;
     public static EasyNPC<?> npcInicial;
     private static boolean borrado;
-    private PlayerConnection playerConnection;
     /**
     * -------------------------------------------------------------------------
     * SPAWNEO DE XOLOTL
@@ -147,14 +146,14 @@ public class ConfiguracionNPC {
                 for(String player : jugadoresDisponibles) {
                     playerData = PlayerConnection.connectedPlayers.get(player);
                     playerData.hasReceivedStarterKit(true);
+                    MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
+                    // Estado guardado en el propio NPC para no repetir el saludo.
+                    EasyNPCActionHandler.setState(
+                        npc, new ResourceLocation("mictlan", "saludo_inicial"), 
+                        StateEntry.of(true), jugador
+                    );
+                    Helpers.escribirDatosDelJugador(jugador.getStringUUID());
                 }
-                MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
-                // Estado guardado en el propio NPC para no repetir el saludo.
-                EasyNPCActionHandler.setState(
-                    npc, new ResourceLocation("mictlan", "saludo_inicial"), 
-                    StateEntry.of(true), jugador
-                );
-                Helpers.escribirDatosDelJugador(jugador.getStringUUID());
         } else {
             MictlanMod.LOGGER.info("[Mictlan] Kit y bienvenida ya fueron entregados.");
         }

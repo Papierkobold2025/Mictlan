@@ -329,11 +329,11 @@ public class MictlanMod {
                 )
 
                 .then(Commands.literal("reputacion").requires(source -> source.hasPermission(2))
-                    .then(Commands.argument("jugador", EntityArgument.players())
+                    .then(Commands.argument("jugador", EntityArgument.player())
                         .then(Commands.argument("faccion", StringArgumentType.string())
                             .suggests((context, builder) -> {
                                 builder.suggest("\"Los Pueblos\"");
-                                builder.suggest("\"El Aquelarre \"");
+                                builder.suggest("\"El Aquelarre\"");
                                 builder.suggest("\"Mictlan\"");
                                 return builder.buildFuture();
                             })
