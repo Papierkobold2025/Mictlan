@@ -17,9 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+
 
 import com.google.gson.Gson;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -39,11 +38,13 @@ import dev.dario.mictlan.Players.PlayerData;
 import dev.dario.mictlan.Players.PlayerDisconnection;
 import dev.dario.mictlan.World.WorldData;
 import dev.dario.mictlan.World.WorldLoad;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 
 /**
@@ -103,17 +104,16 @@ public class MictlanMod {
 
     public MictlanMod() {
 
-        MinecraftForge.EVENT_BUS.addListener(this::onPlayerDisconnect);
-        MinecraftForge.EVENT_BUS.addListener(this::onEntityKilled);
-        MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
-        MinecraftForge.EVENT_BUS.addListener(this::onPlayerConnect);
-        MinecraftForge.EVENT_BUS.addListener(this::onWorldLoad);
-        MinecraftForge.EVENT_BUS.addListener(this::onVillagerTrade);
-        MinecraftForge.EVENT_BUS.addListener(this::offVillagerTrade);
+        NeoForge.EVENT_BUS.addListener(this::onPlayerDisconnect);
+        NeoForge.EVENT_BUS.addListener(this::onEntityKilled);
+        NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(this::onPlayerConnect);
+        NeoForge.EVENT_BUS.addListener(this::onWorldLoad);
+        NeoForge.EVENT_BUS.addListener(this::onVillagerTrade);
+        NeoForge.EVENT_BUS.addListener(this::offVillagerTrade);
 
         LOGGER.info("[Mictlan] Inicializado correctamente. Sin Mixins, sin Nexus todavia.");
-
-        ActionRegistry.register(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{    
+        ActionRegistry.register(Identifier.parse(ConfiguracionNPC.xolotlNPCIdentifier), (actionDataEntry, easyNPC, serverPlayer, arguments) ->{    
             ConfiguracionNPC.interaccionXolotl(easyNPC, serverPlayer);
         });
     }
@@ -171,7 +171,7 @@ public class MictlanMod {
             Entity killer = event.getSource().getEntity();
             if(killer instanceof ServerPlayer jugador) {
                 LivingEntity victim = event.getEntity();
-                MinecraftServer server = jugador.getServer();
+                MinecraftServer server = jugador.level().getServer();
                 facciones.configuracionFacciones(server, jugador, victim);
             }
         }
@@ -250,7 +250,7 @@ public class MictlanMod {
                     .then(Commands.literal("set")
                         .executes(context -> {
                             HelpersComandos helpersComandos = new HelpersComandos();
-                            helpersComandos.marcarNuevaUbicacionNPC(context, new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier));
+                            helpersComandos.marcarNuevaUbicacionNPC(context, Identifier.parse(ConfiguracionNPC.xolotlNPCIdentifier));
                             return 1;
                         })
                     )
@@ -328,7 +328,7 @@ public class MictlanMod {
                     )
                 )
 
-                .then(Commands.literal("reputacion").requires(source -> source.hasPermission(2))
+                .then(Commands.literal("reputacion").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                     .then(Commands.argument("jugador", EntityArgument.player())
                         .then(Commands.argument("faccion", StringArgumentType.string())
                             .suggests((context, builder) -> {

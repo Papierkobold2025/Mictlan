@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -37,14 +38,14 @@ public class Helpers {
             int counter = 0;
             try (DirectoryStream<Path> oldWorldDataResources = Files.newDirectoryStream(mictlanCoreDataPath, "*.nbt")) {
                 for (Path archivo : oldWorldDataResources) {
-                    CompoundTag datos = NbtIo.readCompressed(archivo.toFile());
+                    CompoundTag datos = NbtIo.readCompressed(archivo, NbtAccounter.unlimitedHeap());
                     // Posicion tomada del propio NBT, no del nombre del archivo.
-                    posicionChunksMundoNuevo = new ChunkPos(datos.getInt("xPos"), datos.getInt("zPos"));
+                    posicionChunksMundoNuevo = new ChunkPos(datos.getIntOr("xPos", 0), datos.getIntOr("zPos", 0));
 
                     // Vacia el inventario de los block entities.
-                    entidades = datos.getList("block_entities", Tag.TAG_COMPOUND);
+                    entidades = datos.getListOrEmpty("block_entities");
                     for(ListTag entities = entidades; counter < entities.size(); counter ++) {
-                        entities.getCompound(counter).remove("Items");
+                        entities.getCompound(counter).ifPresent(compound -> compound.remove("Items"));
                     }
                     mundo.getChunkSource().chunkMap.write(posicionChunksMundoNuevo, datos);
                     Files.delete(archivo);
@@ -68,10 +69,10 @@ public class Helpers {
         int counter = 0;
         try (DirectoryStream<Path> oldWorldEntityResources = Files.newDirectoryStream(mictlanCoreEntitiesPath, "*.nbt")){
             for (Path archivo : oldWorldEntityResources) {
-                CompoundTag datos = NbtIo.readCompressed(archivo.toFile());
-                ListTag recibirEntidades = datos.getList("entidades", Tag.TAG_COMPOUND);
+                CompoundTag datos = NbtIo.readCompressed(archivo, NbtAccounter.unlimitedHeap());
+                ListTag recibirEntidades = datos.getListOrEmpty("entidades");
                 for(ListTag recoleccionDeEntidades = recibirEntidades; counter < recoleccionDeEntidades.size(); counter++) {
-                    CompoundTag entidadGuardada = recoleccionDeEntidades.getCompound(counter);
+                    CompoundTag entidadGuardada = recoleccionDeEntidades.getCompoundOrEmpty(counter);
                     // Crea la entidad con su UUID, posicion y datos originales.
                     Optional<Entity> pegarEntidadesEnMundo = EntityType.create(entidadGuardada, mundo);
 

@@ -12,7 +12,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 
 /**
@@ -21,9 +21,9 @@ import net.minecraft.server.MinecraftServer;
  */
 public class Facciones {
     /** Rutas a los archivos de cada faccion dentro del datapack. */
-    private ResourceLocation rutaPueblos = new ResourceLocation("mictlan_medieval", "facciones/pueblos.json");
-    private ResourceLocation rutaAquelarre = new ResourceLocation("mictlan_medieval", "facciones/aquelarre.json");
-    private ResourceLocation rutaMictlan = new ResourceLocation("mictlan_medieval", "facciones/mictlan.json");
+    private Identifier rutaPueblos = Identifier.fromNamespaceAndPath("mictlan_medieval", "facciones/pueblos.json");
+    private Identifier rutaAquelarre = Identifier.fromNamespaceAndPath("mictlan_medieval", "facciones/aquelarre.json");
+    private Identifier rutaMictlan = Identifier.fromNamespaceAndPath("mictlan_medieval", "facciones/mictlan.json");
 
     /** Archivos de faccion encontrados (vacio si el archivo no existe). */
     private List<Optional<Resource>> archivosFacciones = new ArrayList<>();
@@ -43,7 +43,7 @@ public class Facciones {
     private HashMap<String, Integer> reputacionFaccion = new HashMap<>();
 
     /** Todas las facciones que se revisan en cada muerte. */
-    private List<ResourceLocation> rutaFacciones = new ArrayList<>(List.of(rutaPueblos, rutaAquelarre, rutaMictlan));
+    private List<Identifier> rutaFacciones = new ArrayList<>(List.of(rutaPueblos, rutaAquelarre, rutaMictlan));
 
     /**
      * Forma del JSON de una faccion. Gson usa los nombres de los campos:
@@ -65,7 +65,7 @@ public class Facciones {
         accionMatar accion = new accionMatar();
         // Se releen los archivos en cada muerte (asi un /reload aplica sin reiniciar).
         archivosFacciones.clear();
-        for(ResourceLocation directorio : rutaFacciones) {
+        for(Identifier directorio : rutaFacciones) {
             archivosFacciones.add(servidor.getResourceManager().getResource(directorio));
         }
         for(Optional<Resource> faccion : archivosFacciones){
