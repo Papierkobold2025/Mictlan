@@ -3,7 +3,7 @@ package dev.dario.mictlan.World;
 import java.io.IOException;
 
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.loading.FMLPaths;
 import java.nio.file.Path;
 
 import dev.dario.mictlan.Core.MictlanMod;

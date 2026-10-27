@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

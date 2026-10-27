@@ -5,13 +5,16 @@ import java.nio.file.DirectoryStream;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
+
 import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.Optional;
@@ -21,6 +24,7 @@ import dev.dario.mictlan.Players.PlayerConnection;
 import dev.dario.mictlan.World.WorldData;
 import dev.dario.mictlan.World.WorldLoad;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 
 
 public class Helpers {
@@ -74,7 +78,8 @@ public class Helpers {
                 for(ListTag recoleccionDeEntidades = recibirEntidades; counter < recoleccionDeEntidades.size(); counter++) {
                     CompoundTag entidadGuardada = recoleccionDeEntidades.getCompoundOrEmpty(counter);
                     // Crea la entidad con su UUID, posicion y datos originales.
-                    Optional<Entity> pegarEntidadesEnMundo = EntityType.create(entidadGuardada, mundo);
+                    ValueInput lectorEntidad = TagValueInput.create(ProblemReporter.DISCARDING, mundo.registryAccess(), entidadGuardada);
+                    Optional<Entity> pegarEntidadesEnMundo = EntityType.create(lectorEntidad, mundo, EntitySpawnReason.LOAD);
 
                     if(pegarEntidadesEnMundo.isPresent()) {
                         MictlanMod.LOGGER.info("[Mictlan] " + pegarEntidadesEnMundo.get());

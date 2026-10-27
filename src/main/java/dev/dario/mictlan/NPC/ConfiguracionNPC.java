@@ -24,7 +24,7 @@ import dev.dario.mictlan.Players.PlayerData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -37,7 +37,7 @@ public class ConfiguracionNPC {
     public static String xolotlNPCIdentifier = "mictlan:xolotl";
     public static String identificadoPresetXolotl = "mictlan:easy_npc/preset/humanoid/xolotl.npc.snbt";
     private static String messageContent;
-    private static ResourceLocation rutaDialogos;
+    private static Identifier rutaDialogos;
     private static Optional<Resource> rutaDialogosFile;
     private static AccionesXolotl dialogosNPC; 
     private static List<DialogosXolotl> dialogosXolotl;
@@ -55,10 +55,10 @@ public class ConfiguracionNPC {
 
     public static Optional<EasyNPC<?>> xolotlPresence(ServerPlayer handler) {
         // Solo se crea si no hay ya un NPC con el identificador de Xolotl.
-        if(EasyNPCEntityHandler.getByCustomIdentifier(new ResourceLocation(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
+        if(EasyNPCEntityHandler.getByCustomIdentifier(Identifier.parse(ConfiguracionNPC.xolotlNPCIdentifier)).isEmpty()) {
             spawnXolotl = EasyNPCEntityHandler.spawnFromPreset(
-                new ResourceLocation(ConfiguracionNPC.identificadoPresetXolotl), 
-                handler.getServer().overworld(), 
+                Identifier.parse(ConfiguracionNPC.identificadoPresetXolotl), 
+                handler.level().getServer().overworld(), 
                 Vec3.atBottomCenterOf(handler.getOnPos().offset(5, 5, 1)), 
                 null, null
             );
@@ -113,7 +113,7 @@ public class ConfiguracionNPC {
             npcInicial = npc;
             PlayerData playerData;
             Set<String> jugadoresDisponibles = PlayerConnection.connectedPlayers.keySet();
-            jugadoresSaludados(jugador.getServer());
+            jugadoresSaludados(jugador.level().getServer());
                 messageContent = "Bienvenidos " + saludoAJugadores + "!";
                 mensajesXolotl.add(
                     new ActionDataEntry(ActionDataType.MESSAGE, "")
@@ -141,7 +141,7 @@ public class ConfiguracionNPC {
                         );
                     }
                 }
-                EasyNPCActionHandler.schedule(npc, new ResourceLocation("mictlan", "saludo"), 60, mensajesXolotl);
+                EasyNPCActionHandler.schedule(npc, Identifier.fromNamespaceAndPath("mictlan", "saludo"), 60, mensajesXolotl);
                 // Todos los jugadores conectados durante el saludo cuentan como que ya recibieron el kit.
                 for(String player : jugadoresDisponibles) {
                     playerData = PlayerConnection.connectedPlayers.get(player);
@@ -149,7 +149,7 @@ public class ConfiguracionNPC {
                     MictlanMod.CurrentEra.haRecibidoSaludoInicial(true);
                     // Estado guardado en el propio NPC para no repetir el saludo.
                     EasyNPCActionHandler.setState(
-                        npc, new ResourceLocation("mictlan", "saludo_inicial"), 
+                        npc, Identifier.fromNamespaceAndPath("mictlan", "saludo_inicial"), 
                         StateEntry.of(true), jugador
                     );
                     Helpers.escribirDatosDelJugador(jugador.getStringUUID());
@@ -177,15 +177,15 @@ public class ConfiguracionNPC {
 
     /** Se llama al interactuar con Xolotl: lee los dialogos y saluda si aun no lo hizo. */
     public static void interaccionXolotl(EasyNPC<?> npc, ServerPlayer jugador) {
-        rutaDialogos = new ResourceLocation("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
-        rutaDialogosFile = jugador.getServer().getResourceManager().getResource(rutaDialogos);
+        rutaDialogos = Identifier.fromNamespaceAndPath("mictlan_medieval", "dialogos/bienvenida_xolotl.json");
+        rutaDialogosFile = jugador.level().getServer().getResourceManager().getResource(rutaDialogos);
         try (BufferedReader leerDialogos = rutaDialogosFile.get().openAsReader()){
             dialogosNPC = MictlanMod.gson.fromJson(leerDialogos, AccionesXolotl.class);
             dialogosXolotl = dialogosNPC.xolotl.bienvenida;
         } catch(IOException e) {
             MictlanMod.LOGGER.error("[mictlan] Dialogos del NPC no pudieron ser leidos!", e);
         }
-        saludoInicial = EasyNPCActionHandler.getState(npc, new ResourceLocation("mictlan", "saludo_inicial"));
+        saludoInicial = EasyNPCActionHandler.getState(npc, Identifier.fromNamespaceAndPath("mictlan", "saludo_inicial"));
         // null = el estado nunca se ha puesto, o sea, todavia no saluda.
         if(saludoInicial == null) {
            mensajesXolotl(npc, dialogosXolotl, jugador);
@@ -220,7 +220,7 @@ public class ConfiguracionNPC {
     * -------------------------------------------------------------------------
     */
 
-    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<CommandSourceStack> context, ServerPlayer handler, ResourceLocation npcAObtener) {
+    public Optional<EasyNPC<?>> obtenerNPC(CommandContext<CommandSourceStack> context, ServerPlayer handler, Identifier npcAObtener) {
         xolotlHome = xolotlPresence(handler).get();
         if(!(xolotlHome == null)) {
             return xolotlPresence;

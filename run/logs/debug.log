@@ -1,0 +1,84 @@
+[20:31:47] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.20.1 with Fabric Loader 0.19.5
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Found game constructor: net.minecraft.server.Main -> net/minecraft/server/Main
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Patching game constructor main([Ljava/lang/String;)V
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) 20w22a+ detected, patching main method...
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Detected version above 20w22a
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Applying brand name hook to net/minecraft/client/ClientBrandRetriever::getClientModName
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Applying brand name hook to net/minecraft/server/MinecraftServer::getServerModName
+[20:31:47] [main/DEBUG] (FabricLoader/GamePatch) Patched 3 classs
+[20:31:47] [main/DEBUG] (FabricLoader/Discovery) Mod discovery time: 33.7 ms
+[20:31:47] [main/DEBUG] (FabricLoader/Resolution) Mod resolution time: 127.1 ms
+[20:31:47] [main/INFO] (FabricLoader) Loading 52 mods:
+	- easy_npc 7.13.1
+	- easy_npc_bundle 7.13.1
+	- easy_npc_config_ui 7.13.1
+	- fabric-api 0.92.12+1.20.1
+	- fabric-api-base 0.4.32+1802ada577
+	- fabric-api-lookup-api-v1 1.6.37+1802ada577
+	- fabric-biome-api-v1 13.0.15+93aa238b77
+	- fabric-block-api-v1 1.0.12+1802ada577
+	- fabric-block-view-api-v2 1.0.3+924f046a77
+	- fabric-command-api-v1 1.2.35+f71b366f77
+	- fabric-command-api-v2 2.2.14+1802ada577
+	- fabric-commands-v0 0.2.52+df3654b377
+	- fabric-containers-v0 0.1.68+df3654b377
+	- fabric-content-registries-v0 4.0.13+1802ada577
+	- fabric-convention-tags-v1 1.5.6+1802ada577
+	- fabric-crash-report-info-v1 0.2.20+1802ada577
+	- fabric-data-attachment-api-v1 1.0.2+de0fd6d177
+	- fabric-data-generation-api-v1 12.4.0+238242b777
+	- fabric-dimensions-v1 2.1.55+1802ada577
+	- fabric-entity-events-v1 1.6.1+1c78457f77
+	- fabric-events-interaction-v0 0.6.6+13a40c6677
+	- fabric-events-lifecycle-v0 0.2.64+df3654b377
+	- fabric-game-rule-api-v1 1.0.41+1802ada577
+	- fabric-gametest-api-v1 1.2.15+1802ada577
+	- fabric-item-api-v1 2.1.29+1802ada577
+	- fabric-item-group-api-v1 4.0.14+1802ada577
+	- fabric-lifecycle-events-v1 2.2.23+1802ada577
+	- fabric-loot-api-v2 1.2.3+1802ada577
+	- fabric-loot-tables-v1 1.1.47+9e7660c677
+	- fabric-message-api-v1 5.1.10+1802ada577
+	- fabric-mining-level-api-v1 2.1.52+1802ada577
+	- fabric-networking-api-v1 1.3.15+0caff8d077
+	- fabric-networking-v0 0.3.55+df3654b377
+	- fabric-object-builder-api-v1 11.1.5+e35120df77
+	- fabric-particles-v1 1.1.3+1802ada577
+	- fabric-recipe-api-v1 1.0.25+1802ada577
+	- fabric-registry-sync-v0 2.4.1+4c0a70e677
+	- fabric-rendering-data-attachment-v1 0.3.39+92a0d36777
+	- fabric-rendering-fluids-v1 3.0.29+1802ada577
+	- fabric-resource-conditions-api-v1 2.3.9+1802ada577
+	- fabric-resource-loader-v0 0.11.12+fb82e9d777
+	- fabric-screen-handler-api-v1 1.3.34+1802ada577
+	- fabric-tag-api-v1 1.3.0+238242b777
+	- fabric-transfer-api-v1 3.3.6+8dd72ea377
+	- fabric-transitive-access-wideners-v1 4.3.2+1802ada577
+	- fabricloader 0.19.5
+	- java 17
+	- mictlan 0.1.0-SNAPSHOT
+	- minecraft 1.20.1
+	- mixinextras 0.5.5
+	- patchouli 1.20.1-85-FABRIC
+	   \-- fiber 0.23.0-2
+[20:31:49] [main/WARN] (FabricLoader/ModRemap) Mapping target name conflicts detected:
+[20:31:49] [main/WARN] (FabricLoader/ModRemap) METHODs de/markusbordihn/easynpc/configui/client/screen/components/Checkbox/[net/minecraft/class_339/method_48579, renderButton](Lnet/minecraft/class_332;IIF)V -> renderButton
+[20:31:49] [main/WARN] (FabricLoader/ModRemap) METHODs de/markusbordihn/easynpc/client/screen/components/CustomButton/[renderButton, net/minecraft/class_339/method_48579](Lnet/minecraft/class_332;IIF)V -> renderButton
+[20:31:49] [main/WARN] (FabricLoader/ModRemap) METHODs de/markusbordihn/easynpc/client/screen/components/SliderButton/[net/minecraft/class_339/method_48579, renderButton](Lnet/minecraft/class_332;IIF)V -> renderButton
+[20:31:49] [main/ERROR] (FabricLoader/ModRemap) There were unfixable conflicts.
+[20:31:49] [main/ERROR] (FabricLoader) Failed to remap mods!
+net.fabricmc.loader.impl.FormattedException: java.lang.RuntimeException: Unfixable conflicts
+	at net.fabricmc.loader.impl.discovery.RuntimeModRemapper.remap(RuntimeModRemapper.java:221) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.FabricLoaderImpl.setup(FabricLoaderImpl.java:254) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.FabricLoaderImpl.load(FabricLoaderImpl.java:199) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.Knot.init(Knot.java:142) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:66) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotServer.main(KnotServer.java:23) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) ~[?:?]
+Caused by: java.lang.RuntimeException: Unfixable conflicts
+	at net.fabricmc.loader.impl.lib.tinyremapper.TinyRemapper.handleConflicts(TinyRemapper.java:961) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.lib.tinyremapper.TinyRemapper.propagate(TinyRemapper.java:860) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.lib.tinyremapper.TinyRemapper.mrjRefresh(TinyRemapper.java:1140) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.lib.tinyremapper.TinyRemapper.apply(TinyRemapper.java:992) ~[fabric-loader-0.19.5.jar:?]
+	at net.fabricmc.loader.impl.discovery.RuntimeModRemapper.remap(RuntimeModRemapper.java:174) ~[fabric-loader-0.19.5.jar:?]
+	... 6 more

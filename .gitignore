@@ -9,9 +9,6 @@ build/
 .eclipse/
 bin/
 
-# Fabric/Loom run directories (contienen el mundo de prueba, logs, etc.)
-run/
-
 # OS
 .DS_Store
 

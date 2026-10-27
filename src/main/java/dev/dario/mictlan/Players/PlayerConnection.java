@@ -39,9 +39,9 @@ public class PlayerConnection {
     public static PlayerData playerConnection(ServerPlayer handler){
         xolotlPresent = (ConfiguracionNPC.isPresentXolotl().isPresent());
         playerHandler = handler;
-        String playerName = playerHandler.getGameProfile().getName();
+        String playerName = playerHandler.getGameProfile().name();
         //jugadoresDisponibles.add(playerHandler);
-        playerUUID = playerHandler.getGameProfile().getId().toString();
+        playerUUID = playerHandler.getGameProfile().id().toString();
         playerData = new PlayerData(handler.getStringUUID());
         playerFilePath = Path.of(WorldLoad.playerDir.toString(), playerUUID +".json");
         

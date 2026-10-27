@@ -6,7 +6,7 @@ import java.util.HashMap;
 import dev.dario.mictlan.Helpers.Helpers;
 import dev.dario.mictlan.World.WorldLoad;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public class PlayerDisconnection {
     public static ServerPlayer jugadorDesconectado;
@@ -28,7 +28,7 @@ public class PlayerDisconnection {
         }
             jugadorDesconectado = jugador;
             // Deja los datos compartidos de PlayerConnection apuntando a este jugador.
-            PlayerConnection.playerUUID = jugador.getGameProfile().getId().toString();
+            PlayerConnection.playerUUID = jugador.getGameProfile().id().toString();
             PlayerConnection.playerFilePath = Path.of(
                 WorldLoad.playerDir.toString(), 
                 PlayerConnection.playerUUID +".json"
