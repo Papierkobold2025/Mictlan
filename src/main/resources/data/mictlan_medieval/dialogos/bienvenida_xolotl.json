@@ -32,7 +32,7 @@
             },
             {
                 "tipo": "comando",
-                "valor": "/give @a patchouli:guide_book{\"patchouli:book\":\"mictlan:codice\"}"
+                "valor": "/give @a patchouli:guide_book[patchouli:book=\"mictlan:codice\"]"
             },
             {
                 "tipo": "comando",
